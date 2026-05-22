@@ -90,11 +90,11 @@ if choice == "🔍 Pengesan Scam":
             with st.spinner("AntiLolos AI sedang mengimbas corak penipuan siber..."):
                 
                 # Memeriksa pangkalan data komuniti (Supabase Caching) mengikut skrip SQL asal
-                db_query = supabase.table("Scam_Logs").select("*").eq("Teks_Laporan", user_input.strip()).execute()
+                db_query = supabase.table("scam_logs").select("*").eq("teks_laporan", user_input.strip()).execute()
                 
                 if db_query.data:
-                    status = db_query.data[0]["Klasifikasi_Gemini"]
-                    ulasan = db_query.data[0]["Ulasan_AI"]
+                    status = db_query.data[0]["klasifikasi_gemini"]
+                    ulasan = db_query.data[0]["ulasan_ai"]
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
                 else:
                     try:
@@ -112,10 +112,10 @@ if choice == "🔍 Pengesan Scam":
                         ulasan = output_text.replace("KATEGORI: SCAM BAHAYA", "").replace("KATEGORI: SELAMAT", "").strip()
                         
                         # Menyimpan data ancaman baharu ke dalam storan awan Supabase
-                        supabase.table("Scam_Logs").insert({
-                            "Teks_Laporan": user_input.strip(),
-                            "Klasifikasi_Gemini": status,
-                            "Ulasan_AI": ulasan
+                        supabase.table("scam_logs").insert({
+                            "teks_laporan": user_input.strip(),
+                            "klasifikasi_gemini": status,
+                            "ulasan_ai": ulasan
                         }).execute()
                     except Exception as e:
                         st.error("Sistem mengalami kelengahan teknikal rangkaian.")
