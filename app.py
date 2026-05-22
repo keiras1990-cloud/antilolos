@@ -21,33 +21,73 @@ genai.configure(api_key=GEMINI_API_KEY)
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
 
 # ==========================================
-# 2. SUNTIKAN GAYA REKAAN KHAS (MOBILE-OPTIMIZED CSS)
+# 2. SUNTIKAN GAYA REKAAN KHAS (ANTI-DARK MODE PERANTI)
 # ==========================================
 st.markdown("""
     <style>
-    /* Mengoptimumkan latar belakang dan font seluruh peranti */
-    .stApp { background-color: #f8fafc; }
+    /* Memaksa seluruh latar belakang aplikasi kekal cerah & bersih walaupun di telefon Mod Gelap */
+    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+        background-color: #f8fafc !important;
+    }
+    
+    /* Menghalang semua jenis tulisan daripada bertukar menjadi putih secara automatik */
+    h1, h2, h3, h4, h5, h6, p, span, label, li, small, time {
+        color: #1e293b !important;
+    }
+    
+    /* Mengemaskan rupa bentuk bar Navigasi Tab supaya tulisan kelihatan jelas di telefon */
+    button[data-baseweb="tab"] div p {
+        color: #64748b !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] div p {
+        color: #ef4444 !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Memastikan kotak input teks textarea mempunyai tulisan gelap yang kontras */
+    .stTextArea textarea {
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    
+    /* Mengoptimumkan kotak sembang (Chat Bubbles) kuiz supaya tulisan di dalamnya terang */
+    [data-testid="stChatMessage"] {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+    [data-testid="stChatMessage"] p {
+        color: #1e293b !important;
+    }
     
     /* Kemasan butang sentuhan jari mobile */
     .stButton>button { border-radius: 25px !important; font-weight: bold; transition: all 0.3s ease; padding: 12px 24px !important; width: 100% !important; }
+    .stButton>button[data-testid="baseButton-primary"] { background-color: #ef4444 !important; color: #ffffff !important; border: none !important; }
+    .stButton>button[data-testid="baseButton-secondary"] { background-color: #ffffff !important; color: #1e293b !important; border: 1px solid #cbd5e1 !important; }
     .stButton>button:hover { transform: scale(1.01); }
     
     /* Sentuhan visual responsif untuk kad amaran dan selamat */
-    .scam-card { padding: 20px; border-radius: 15px; background-color: #fff5f5; border-left: 6px solid #ef4444; box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.06); margin-bottom: 20px; }
-    .safe-card { padding: 20px; border-radius: 15px; background-color: #f0fdf4; border-left: 6px solid #22c55e; box-shadow: 0px 4px 12px rgba(34, 197, 94, 0.06); margin-bottom: 20px; }
-    .report-box { padding: 20px; border-radius: 15px; background-color: #ffffff; border: 2px solid #e2e8f0; text-align: center; box-shadow: 0px 6px 20px rgba(0,0,0,0.03); margin-top: 15px; }
+    .scam-card { padding: 20px; border-radius: 15px; background-color: #fff5f5 !important; border-left: 6px solid #ef4444; box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.06); margin-bottom: 20px; }
+    .scam-card h3, .scam-card p { color: #7f1d1d !important; }
+    
+    .safe-card { padding: 20px; border-radius: 15px; background-color: #f0fdf4 !important; border-left: 6px solid #22c55e; box-shadow: 0px 4px 12px rgba(34, 197, 94, 0.06); margin-bottom: 20px; }
+    .safe-card h3, .safe-card p { color: #064e3b !important; }
+    
+    .report-box { padding: 20px; border-radius: 15px; background-color: #ffffff !important; border: 2px solid #e2e8f0; text-align: center; box-shadow: 0px 6px 20px rgba(0,0,0,0.03); margin-top: 15px; }
+    .report-box h2, .report-box h1, .report-box h4, .report-box p { color: #1e293b !important; }
     
     /* Susun atur kad carta Top 10 Aduan */
-    .leaderboard-item { padding: 15px; border-radius: 12px; background-color: #ffffff; border: 1px solid #e2e8f0; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0px 2px 6px rgba(0,0,0,0.01); }
-    .rank-number { font-size: 20px; font-weight: bold; color: #ef4444; width: 35px; text-align: center; }
+    .leaderboard-item { padding: 15px; border-radius: 12px; background-color: #ffffff !important; border: 1px solid #e2e8f0; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0px 2px 6px rgba(0,0,0,0.01); }
+    .rank-number { font-size: 20px; font-weight: bold; color: #ef4444 !important; width: 35px; text-align: center; }
     .brand-logo { font-size: 26px; margin-right: 12px; width: 30px; text-align: center; }
     .scam-details { flex-grow: 1; word-break: break-word; }
-    .badge-count { background-color: #fee2e2; color: #ef4444; padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; text-align: center; margin-left: 5px; white-space: nowrap; }
+    .scam-details strong, .scam-details span, .scam-details small { color: #1e293b !important; }
+    .badge-count { background-color: #fee2e2 !important; color: #ef4444 !important; padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; text-align: center; margin-left: 5px; white-space: nowrap; }
     
     /* Memusatkan pengepala utama di skrin telefon */
     .main-header { text-align: center; padding: 10px 0; }
-    
-    /* Menghilangkan garisan border default radio button hancur jika ada */
     div[data-testid="stRadio"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
@@ -118,7 +158,6 @@ def generate_warning_card(status, ulasan):
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='PNG')
     return img_byte_arr.getvalue()
-
 
 # ==========================================
 # 5. PEMBINAAN NAVIGASI TAB RASMI (PREMIUM MOBILE VIEW)
@@ -254,17 +293,17 @@ with tab2:
 
         st.markdown(f"""
             <div class='report-box'>
-                <h2 style='margin: 0; color: #1e293b;'>🛡️ KAD LAPORAN ANTILOLOS</h2>
+                <h2 style='margin: 0;'>🛡️ KAD LAPORAN ANTILOLOS</h2>
                 <h1 style='color: #ef4444; font-size: 54px; margin: 15px 0;'>Risiko: {total}%</h1>
                 <h4 style='margin-bottom: 15px; font-weight: bold;'>{status}</h4>
-                <p style='font-size: 16px; text-align: justify; color: #475569;'>{ulasan}</p>
+                <p style='font-size: 16px; text-align: justify;'>{ulasan}</p>
             </div>
         """, unsafe_allow_html=True)
         kuiz_share_text = f"*🚨 UJIAN KEKEBALAN DIGITAL #ANTILOLOS 🚨*\nKeputusan Skor Risiko Saya: *{total}%*\n*Klasifikasi Kesedaran:* {status}\n\nJangan tunggu sehingga simpanan bocor. Jom uji ketahanan mental siber anda sekarang di: https://antilolos.streamlit.app"
         encoded_kuiz_text = urllib.parse.quote(kuiz_share_text)
         whatsapp_kuiz_url = f"https://api.whatsapp.com/send?text={encoded_kuiz_text}"
         st.write("---")
-        st.markdown(f'<a href="{whatsapp_kuiz_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 14px 20px; border-radius: 25px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s ease;">➔ Kongsi Keputusan Kuiz ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
+        st.markdown(f'<a href="{whatsapp_kuiz_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 25px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s ease;">➔ Kongsi Keputusan Kuiz ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
         if st.button("Ulang Semula Ujian", use_container_width=True, key="btn_restart_quiz"):
             del st.session_state.soalan_shuffled
             st.session_state.soalan_semasa = 0
@@ -307,9 +346,9 @@ with tab3:
                             <div class='rank-number'>#{rank}</div>
                             <div class='brand-logo'>{logo_visual}</div>
                             <div class='scam-details'>
-                                <strong style='color: #1e293b; font-size: 15px;'>Mesej Ditangkap:</strong> 
-                                <span style='color: #475569; font-style: italic; font-size: 14px;'>"{teks_paparan}"</span><br>
-                                <small style='color: #ef4444; font-weight: 600; font-size: 12px;'>🛡️ Ulasan AI: {ulasan_paparan}</small>
+                                <strong>Mesej Ditangkap:</strong> 
+                                <span style='font-style: italic;'>"{teks_paparan}"</span><br>
+                                <small style='font-weight: 600;'>🛡️ Ulasan AI: {ulasan_paparan}</small>
                             </div>
                             <div class='badge-count'>{jumlah_kes} Aduan</div>
                         </div>
