@@ -98,7 +98,7 @@ if choice == "🔍 Pengesan Scam":
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
                 else:
                     try:
-                        model = genai.GenerativeModel('gemini-2.0-flash')
+                        model = genai.GenerativeModel('gemini-2.5-flash')
                         system_instruction = (
                             "Anda adalah pakar keselamatan siber terlatih di Malaysia. Analisis mesej di bawah. "
                             "Tentukan klasifikasi sama ada ia 'SCAM BAHAYA' atau 'SELAMAT/SAH'. "
