@@ -49,17 +49,17 @@ def dapatkan_logo_scam(teks):
     if any(x in teks_lower for x in ["maybank", "cimb", "bank", "tac", "bsn", "pbe"]):
         return "🏦"  # Logo Bank
     elif any(x in teks_lower for x in ["whatsapp", "wasap", "wa.me"]):
-        return "🟢"  # Logo WhatsApp / Sembang
+        return "🟢"  # Logo WhatsApp
     elif any(x in teks_lower for x in ["lhdn", "cukai", "hasil", "mahkamah", "polis", "pdrm"]):
-        return "⚖️"  # Logo Agensi / Undang-undang
+        return "⚖️"  # Logo Agensi
     elif any(x in teks_lower for x in ["pos", "laju", "j&t", "courier", "bungkusan", "parcel"]):
-        return "📦"  # Logo Kurier / Penghantaran
+        return "📦"  # Logo Kurier
     elif any(x in teks_lower for x in ["shopee", "lazada", "hadiah", "cabutan", "menang"]):
-        return "🛍️"  # Logo Membeli-belah / Hadiah
+        return "🛍️"  # Logo Hadiah
     elif "telegram" in teks_lower:
         return "✈️"  # Logo Telegram
     else:
-        return "⚠️"  # Logo Amaran Umum
+        return "⚠️"  # Amaran Umum
 
 # ==========================================
 # 4. ENJIN GENERATOR KAD VISUAL (PILLOW)
@@ -108,12 +108,12 @@ def generate_warning_card(status, ulasan):
     img.save(img_byte_arr, format='PNG')
     return img_byte_arr.getvalue()
 
-# Mengawal penukaran menu utama (Telah ditambah pilihan Tab Ketiga)
+# Mengawal menu utama
 menu = ["🔍 Pengesan Scam", "🎯 Ujian Kekebalan", "📊 Top 10 Aduan"]
 choice = st.radio("Menu", menu, horizontal=True, label_visibility="collapsed")
 
 # ==========================================
-# SEGMEN 1: 🔍 PENGESAN SCAM
+# SEGMEN 1: 🔍 PENGESAN SCAM (LOGIK CACHING DIPERBAIK)
 # ==========================================
 if choice == "🔍 Pengesan Scam":
     st.title("🛡️ AntiLolos")
@@ -128,12 +128,24 @@ if choice == "🔍 Pengesan Scam":
         else:
             with st.spinner("AntiLolos AI sedang mengimbas corak penipuan siber..."):
                 
+                # Semakan data sedia ada di Supabase
                 db_query = supabase.table("scam_logs").select("*").eq("teks_laporan", user_input.strip()).execute()
                 
                 if db_query.data:
                     status = db_query.data[0]["klasifikasi_gemini"]
                     ulasan = db_query.data[0]["ulasan_ai"]
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
+                    
+                    # [PERBAIKAN UTAMA] Walaupun cache hit, kita tetap hantar baris baharu ke Supabase 
+                    # supaya Tab 3 boleh mengira 'Request' carian terkumpul secara real-time!
+                    try:
+                        supabase.table("scam_logs").insert({
+                            "teks_laporan": user_input.strip(),
+                            "klasifikasi_gemini": status,
+                            "ulasan_ai": ulasan
+                        }).execute()
+                    except:
+                        pass
                 else:
                     try:
                         model = genai.GenerativeModel('gemini-2.5-flash')
@@ -149,6 +161,7 @@ if choice == "🔍 Pengesan Scam":
                         status = "SCAM BAHAYA" if "KATEGORI: SCAM BAHAYA" in output_text or "SCAM BAHAYA" in output_text else "SELAMAT"
                         ulasan = output_text.replace("KATEGORI: SCAM BAHAYA", "").replace("KATEGORI: SELAMAT", "").strip()
                         
+                        # Simpan kali pertama ke pangkalan data Supabase
                         supabase.table("scam_logs").insert({
                             "teks_laporan": user_input.strip(),
                             "klasifikasi_gemini": status,
@@ -174,7 +187,7 @@ if choice == "🔍 Pengesan Scam":
                     st.image(image_bytes, caption="Kad Pengesahan AntiLolos Visual")
                     st.download_button("⬇️ Download Kad Pengesahan Ini", image_bytes, "Selamat_AntiLolos.png", "image/png")
                     
-                    share_text = f"*ℹ️ INFO KESELAMATAN ANTILOLOS*\nMesej ini telah disemak dan disahkan *SELAMAT*.\nSemak di: https://antilolos.streamlit.app"
+                    share_text = f"*ℹ️ INFO KESELAMATAN ANTILOLOS*\nMesej ini telah disemak and disahkan *SELAMAT*.\nSemak di: https://antilolos.streamlit.app"
                 
                 if status != "RALAT":
                     encoded_text = urllib.parse.quote(share_text)
@@ -257,7 +270,7 @@ elif choice == "🎯 Ujian Kekebalan":
             st.rerun()
 
 # ==========================================
-# SEGMEN 3: 📊 TOP 10 ADUAN SCAMMER (REAL-TIME AGGREGATION)
+# SEGMEN 3: 📊 TOP 10 ADUAN SCAMMER (KIRA KEKERAPAN PENUH)
 # ==========================================
 elif choice == "📊 Top 10 Aduan":
     st.title("📊 Trend Taktik Scammer Terkini")
@@ -265,35 +278,28 @@ elif choice == "📊 Top 10 Aduan":
     st.write("Senarai 10 mesej penipuan yang paling kerap disemak dan dilaporkan oleh pengguna di dalam pangkalan data komuniti AntiLolos.")
     
     with st.spinner("Mengekstrak data carta kehangatan aduan siber..."):
-        # Mengambil data dari storan awan Supabase
         res = supabase.table("scam_logs").select("teks_laporan, klasifikasi_gemini, ulasan_ai").execute()
         
         if res.data:
-            # Mengira kekerapan secara ad-hoc menggunakan kamus Python (Bulletproof & Pantas)
             scam_counts = {}
             for data_row in res.data:
                 if data_row.get("klasifikasi_gemini") == "SCAM BAHAYA":
                     teks_lapor = data_row.get("teks_laporan", "").strip()
                     ulas_ai = data_row.get("ulasan_ai", "").strip().replace("**", "")
                     
-                    # Kunci gabungan teks dan ulasan untuk kejituan data
                     kunci_data = (teks_lapor, ulas_ai)
                     scam_counts[kunci_data] = scam_counts.get(kunci_data, 0) + 1
             
-            # Menyusun kedudukan carta aduan tertinggi (Top 10)
             top_10_sorted = sorted(scam_counts.items(), key=lambda x: x[1], reverse=True)[:10]
             
             if top_10_sorted:
                 st.write("---")
                 for rank, ((teks_aduan, ulasan_aduan), jumlah_kes) in enumerate(top_10_sorted, 1):
-                    # Mendapatkan logo visual secara pintar berasaskan teks aduan
                     logo_visual = dapatkan_logo_scam(teks_aduan)
                     
-                    # Memotong teks aduan panjang untuk paparan senarai yang kemas
                     teks_paparan = teks_aduan[:75] + "..." if len(teks_aduan) > 75 else teks_aduan
                     ulasan_paparan = ulasan_aduan[:90] + "..." if len(ulasan_aduan) > 90 else ulasan_aduan
                     
-                    # Suntikan UI senarai berbentuk kad leaderboard
                     st.markdown(f"""
                         <div class='leaderboard-item'>
                             <div class='rank-number'>#{rank}</div>
