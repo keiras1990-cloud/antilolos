@@ -118,8 +118,6 @@ if status == "SCAM BAHAYA":
             
             # Jana Kad Gambar
             image_bytes = generate_warning_card(status, ulasan)
-            
-            # Papar Gambar
             st.image(image_bytes, caption="Kad Amaran AntiLolos")
             
             # Butang Download
@@ -131,12 +129,10 @@ if status == "SCAM BAHAYA":
             )
             # Menutup kotak kad amaran
             st.markdown("</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='scam-card'><h3>⚠️ AMARAN: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
-                    share_text = f"*🚨 PERISAI AMARAN ANTILOLOS 🚨*\nMesej disemak: _\"{user_input[:40]}...\"_\n*Keputusan AI:* ⚠️ {ulasan}\nSemak di: https://antilolos.streamlit.app"
-                elif status == "SELAMAT":
-                    st.markdown(f"<div class='safe-card'><h3>✅ STATUS: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
-                    share_text = f"*ℹ️ INFO KESELAMATAN ANTILOLOS*\nMesej ini disemak dan diklasifikasikan sebagai *SELAMAT*.\nSemak di: https://antilolos.streamlit.app"
-                
+
+        elif status == "SELAMAT":
+            # Paparan untuk status Selamat
+            st.markdown(f"<div class='safe-card'><h3>✅ STATUS: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)                
                 if status != "RALAT":
                     encoded_text = urllib.parse.quote(share_text)
                     whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_text}"
