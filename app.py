@@ -6,6 +6,7 @@ import io
 import urllib.parse
 import random
 import textwrap
+import copy
 
 # ==========================================
 # 1. KONFIGURASI PASAK UTAMA & AMANAH DATA
@@ -21,7 +22,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
 
 # ==========================================
-# 2. SUNTIKAN GAYA REKAAN KHAS (SOLID BUTTONS & ANTI-DARK MODE)
+# 2. SUNTIKAN GAYA REKAAN KHAS (SOLID BLUE BUTTONS & ANTI-DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
@@ -72,8 +73,8 @@ st.markdown("""
         height: auto !important;
     }
     
-    /* [SANGAT IMPAK] Memaksa Teks Di Dalam Semua Butang Padu Kekal Putih Bersih Semasa Mod Gelap */
-    div.stButton > button, div.stButton > button *, 
+    /* Memaksa Teks Di Dalam Semua Butang Padu Kekal Putih Bersih Semasa Mod Gelap peranti */
+    div.stButton > button, div.stButton > button * ,
     .stDownloadButton > button, .stDownloadButton > button * {
         color: #ffffff !important;
     }
@@ -91,14 +92,14 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
-    /* [REKAAN BARU] Menukarkan Kotak Kuiz Menjadi Kad Biru Padu Menyerlah Sama Macam Download */
+    /* Menukarkan Kotak Kuiz Menjadi Butang Biru Padu (Solid Royal Blue) dari awal lagi */
     div.stButton > button[data-testid="baseButton-secondary"],
     div.stButton > button:not([data-testid="baseButton-primary"]) { 
-        background-color: #2563eb !important;         /* Warna biru padu (solid) dari awal lagi */
+        background-color: #2563eb !important;         
         border: none !important;
-        box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.15) !important; /* Bayang menyerlah */
+        box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.15) !important; 
         white-space: normal !important;      
-        text-align: left !important;                 /* Susun dari kiri untuk teks soalan panjang */
+        text-align: left !important;                 
         word-break: break-word !important;   
         font-weight: 600 !important;                  
     }
@@ -106,7 +107,7 @@ st.markdown("""
     /* Kesan warna berbeza apabila butang kuiz disentuh atau ditekan */
     div.stButton > button[data-testid="baseButton-secondary"]:hover,
     div.stButton > button:not([data-testid="baseButton-primary"]):hover { 
-        background-color: #1d4ed8 !important;        /* Biru gelap korporat semasa hover */
+        background-color: #1d4ed8 !important;        
         box-shadow: 0px 6px 16px rgba(37, 99, 235, 0.25) !important;
     }
     
@@ -156,11 +157,11 @@ def dapatkan_logo_scam(teks):
         return "🏦"  
     elif any(x in teks_lower for x in ["whatsapp", "wasap", "wa.me"]):
         return "🟢"  
-    elif any(x in teks_lower for x in ["lhdn", "cukai", "hasil", "mahkamah", "polis", "pdrm"]):
+    elif any(x in teks_lower for x in ["lhdn", "cukai", "hasil", "mahkamah", "polis", "pdrm", "saman", "jpj"]):
         return "⚖️"  
     elif any(x in teks_lower for x in ["pos", "laju", "j&t", "courier", "bungkusan", "parcel"]):
         return "📦"  
-    elif any(x in teks_lower for x in ["shopee", "lazada", "hadiah", "cabutan", "menang"]):
+    elif any(x in teks_lower for x in ["shopee", "lazada", "hadiah", "cabutan", "menang", "baucar"]):
         return "🛍️"  
     elif "telegram" in teks_lower:
         return "✈️"  
@@ -292,27 +293,60 @@ with tab1:
                     st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 14px 20px; border-radius: 25px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s ease;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
 
 # ------------------------------------------
-# SEGMEN 2: 🎯 UJIAN KEKEBALAN
+# SEGMEN 2: 🎯 UJIAN KEKEBALAN (30 SOALAN KUMPULAN BESAR + SHUFFLE JAWAPAN)
 # ------------------------------------------
 with tab2:
     st.markdown("<div class='main-header'><h1>🎯 Ujian Kekebalan Digital</h1></div>", unsafe_allow_html=True)
-    st.write("Hadapi 10 senario rawak simulasi harian. Adakah benteng pertahanan digital anda kukuh?")
+    st.write("Hadapi 10 senario rawak simulasi ancaman harian. Adakah benteng pertahanan digital anda kukuh?")
     
+    # HIMPUNAN LUAS 30 SOALAN MATANG CYBER SECURITY MALAYSIA
     semua_soalan = [
         {"pengirim": "011-3482XXXX", "mesej": "Salam bro, aku Shah ni. Tersalah hantar kod TAC kat fon kau. Boleh forward balik tak? Urgent!", "pilihan": [{"teks": "Salin dan hantar kod TAC terus sebab nak tolong kawan.", "risiko": 10}, {"teks": "Tanya dia balik 'Kau Shah yang mana satu?'", "risiko": 5}, {"teks": "Maki pengirim sebab curiga ini scammer.", "risiko": 2}, {"teks": "Abaikan, sekat nombor, dan call nombor sebenar Shah.", "risiko": 0}]},
         {"pengirim": "SMS Bank", "mesej": "AMARAN! Akaun anda diakses peranti asing. Sekat segera di: http://maybank-security-lock.com", "pilihan": [{"teks": "Panik dan terus klik link untuk tukar password.", "risiko": 10}, {"teks": "Klik link tapi sekadar nak tengok rupa website.", "risiko": 5}, {"teks": "Balas SMS tersebut 'Ini tipu!'", "risiko": 2}, {"teks": "Abaikan SMS dan buka aplikasi rasmi bank secara berasingan.", "risiko": 0}]},
         {"pengirim": "Pegawai LHDN", "mesej": "Tunggakan cukai RM4,820. Waran sita rumah dalam 3 jam. Bayar ke akaun agensi: 1642XXX.", "pilihan": [{"teks": "Takut kena sita, terus buat pindahan wang.", "risiko": 10}, {"teks": "Minta diskaun atau tempoh lanjutan bayaran.", "risiko": 5}, {"teks": "Letak telefon, tapi masih rasa risau dan panik.", "risiko": 2}, {"teks": "Letak panggilan dan semak terus di portal rasmi MyTax.", "risiko": 0}]},
         {"pengirim": "Grup Telegram", "mesej": "Pelaburan Syariah Ustaz Jamil. Modal RM300, pulangan RM5,000 dalam 24 jam.", "pilihan": [{"teks": "Keluarkan RM300 untuk cuba nasib.", "risiko": 10}, {"teks": "Tanya ahli grup lain sama ada mereka dah dapat duit.", "risiko": 5}, {"teks": "Hanya perhati (silent reader) tanpa buat apa-apa.", "risiko": 2}, {"teks": "Report grup tersebut dan Leave Group terus.", "risiko": 0}]},
         {"pengirim": "Iklan Facebook", "mesej": "Telefon anda ada 14 virus! Pasang SecureCleaner.apk sekarang untuk selamatkan peranti.", "pilihan": [{"teks": "Download dan install APK tersebut cepat-cepat.", "risiko": 10}, {"teks": "Download saja tapi tak install lagi.", "risiko": 5}, {"teks": "Tulis komen marah pada iklan tersebut.", "risiko": 2}, {"teks": "Abaikan iklan dan guna antivirus rasmi di telefon.", "risiko": 0}]},
-        {"pengirim": "Pos Laju", "mesej": "Bungkusan ditangguhkan. Sila kemas kini alamat and bayar RM1.20 di: http://poslaju-redirection.top", "pilihan": [{"teks": "Bayar RM1.20 guna kad debit/kredit.", "risiko": 10}, {"teks": "Isi alamat sahaja tapi tak letak maklumat bank.", "risiko": 5}, {"teks": "Klik link sekadar untuk baca butiran bungkusan.", "risiko": 2}, {"teks": "Abaikan SMS dan semak tracking number di aplikasi kurier.", "risiko": 0}]},
+        {"pengirim": "Pos Laju", "mesej": "Bungkusan ditangguhkan. Sila kemas kini alamat dan bayar RM1.20 di: http://poslaju-redirection.top", "pilihan": [{"teks": "Bayar RM1.20 guna kad debit/kredit.", "risiko": 10}, {"teks": "Isi alamat sahaja tapi tak letak maklumat bank.", "risiko": 5}, {"teks": "Klik link sekadar untuk baca butiran bungkusan.", "risiko": 2}, {"teks": "Abaikan SMS dan semak tracking number di aplikasi kurier.", "risiko": 0}]},
         {"pengirim": "Shopee", "mesej": "Tahniah! Anda menang Cabutan Bertuah RM3,000. Tuntut di: http://shopee-rewards-2026.net", "pilihan": [{"teks": "Klik link dan isi IC beserta nombor akaun bank.", "risiko": 10}, {"teks": "Klik link dan letak nama palsu untuk test.", "risiko": 5}, {"teks": "Tanya customer service Shopee dalam in-app chat.", "risiko": 2}, {"teks": "Abaikan, platform rasmi tak guna domain pelik macam .net.", "risiko": 0}]},
         {"pengirim": "Mahkamah Tinggi", "mesej": "(Panggilan Suara) Anda didapati terlibat kes gubahan wang haram. Tekan 1 untuk bercakap dengan pegawai.", "pilihan": [{"teks": "Tekan 1 dan ikut arahan pemanggil sebab takut.", "risiko": 10}, {"teks": "Tekan 1 tapi niat nak main-mainkan pemanggil.", "risiko": 5}, {"teks": "Dengar sampai habis tanpa cakap apa-apa.", "risiko": 2}, {"teks": "Letak telefon serta-merta.", "risiko": 0}]},
         {"pengirim": "SMS Komuniti", "mesej": "Pinjaman syariah lulus 30 min. RM5,000 bulan RM120. WhatsApp: wa.me/6011xxxx", "pilihan": [{"teks": "WhatsApp nombor tu sebab tengah sengkek.", "risiko": 10}, {"teks": "Simpan nombor tu kot-kot terdesak nanti.", "risiko": 5}, {"teks": "Padam SMS tersebut sahaja.", "risiko": 2}, {"teks": "Padam dan terus Block nombor pengirim.", "risiko": 0}]},
-        {"pengirim": "Mesej Viral", "mesej": "Bantuan e-Dompet RM300 dibuka! Tebus kredit percuma di: http://bantuan-tunai-gov.xyz", "pilihan": [{"teks": "Klik dan log masuk guna ID perbankan internet.", "risiko": 10}, {"teks": "Share link tu kat kawan lain suruh diorang cuba dulu.", "risiko": 5}, {"teks": "Klik link untuk tengok siapa yang buat website tu.", "risiko": 2}, {"teks": "Abaikan dan rujuk portal rasmi Kementerian Kewangan.", "risiko": 0}]}
+        {"pengirim": "Mesej Viral", "mesej": "Bantuan e-Dompet RM300 dibuka! Tebus kredit percuma di: http://bantuan-tunai-gov.xyz", "pilihan": [{"teks": "Klik dan log masuk guna ID perbankan internet.", "risiko": 10}, {"teks": "Share link tu kat kawan lain suruh diorang cuba dulu.", "risiko": 5}, {"teks": "Klik link untuk tengok siapa yang buat website tu.", "risiko": 2}, {"teks": "Abaikan dan rujuk portal rasmi Kementerian Kewangan.", "risiko": 0}]},
+        # PENAMBAHAN SOALAN BAHARU (11 HINGGA 30)
+        {"pengirim": "Tugasan TikTok", "mesej": "Buat duit dari rumah! Hanya perlu LIKE & SHARE video TikTok. 1 tugasan dapat RM15. Hubungi kami segera.", "pilihan": [{"teks": "Sertai grup Telegram tugasan dan mula bayar duit deposit modal.", "risiko": 10}, {"teks": "Sertai grup sekadar untuk tengok testimonial ahli lain.", "risiko": 5}, {"teks": "Balas mesej dengan menghantar emoji marah.", "risiko": 2}, {"teks": "Abaikan, ini taktik 'Job Scam' untuk gumpal wang mangsa.", "risiko": 0}]},
+        {"pengirim": "Ejen KWSP", "mesej": "Pengeluaran Khas Kesihatan KWSP Madani RM10,000 dibenarkan. Sila muat turun app rasmi: kwsp-insentif.apk", "pilihan": [{"teks": "Download dan install fail APK tersebut ke telefon.", "risiko": 10}, {"teks": "Download fail tersebut tapi belum tekan install.", "risiko": 5}, {"teks": "Tanya rakan sekerja sama ada mereka tahu tentang ini.", "risiko": 2}, {"teks": "Padam mesej, KWSP tidak pernah hantar fail aplikasi APK.", "risiko": 0}]},
+        {"pengirim": "Telegram Kak Long", "mesej": "Salam dik, akak tengah sangkut kat kaunter bank ni. Kad problem. Boleh pinjam RM500 tak? Malam nanti akak bayar balik.", "pilihan": [{"teks": "Terus transfer RM500 ke akaun bank yang dia berikan.", "risiko": 10}, {"teks": "Balas mesej tanya 'Kenapa kad akaun Kak Long rosak?'", "risiko": 5}, {"teks": "Rasa ragu-ragu tetapi tidak buat apa-apa tindakan.", "risiko": 2}, {"teks": "Telefon terus nombor telefon biasa Kak Long untuk pengesahan.", "risiko": 0}]},
+        {"pengirim": "WhatsApp Winner", "mesej": "Tahniah! Nombor anda menang RM5,000 sempena Ulang Tahun WhatsApp. Sila hantar gambar kad pengenalan anda.", "pilihan": [{"teks": "Tangkap gambar IC depan belakang dan hantar laju-laju.", "risiko": 10}, {"teks": "Hantar gambar IC palsu yang diambil dari Google.", "risiko": 5}, {"teks": "Balas 'Betul ke ni? Jangan tipu saya ya.'", "risiko": 2}, {"teks": "Sekat pengirim, WhatsApp rasmi tidak pernah ada cabutan bertuah.", "risiko": 0}]},
+        {"pengirim": "SMS JPJ Saman", "mesej": "AMARAN! Anda mempunyai saman tertunggak melebihi RM300. Senarai hitam dalam 24 jam. Settle segera di: http://jpj-gov-online.cc", "pilihan": [{"teks": "Klik pautan dan terus masukkan maklumat perbankan internet.", "risiko": 10}, {"teks": "Klik pautan cuma nak tengok nilai saman komposit.", "risiko": 5}, {"teks": "Biarkan SMS tersebut tanpa dipadam.", "risiko": 2}, {"teks": "Semak status saman sebenar di portal MySikap JPJ rasmi.", "risiko": 0}]},
+        {"pengirim": "Hacker E-mel", "mesej": "Komputer anda telah digodam. Saya ada video peribadi anda. Bayar RM2,000 dalam bentuk Bitcoin atau saya sebarkan.", "pilihan": [{"teks": "Panik dan terus cari jalan beli Bitcoin untuk bayar.", "risiko": 10}, {"teks": "Balas e-mel tersebut merayu minta kurangkan harga.", "risiko": 5}, {"teks": "Rasa takut yang amat sangat sehingga tidak boleh tidur.", "risiko": 2}, {"teks": "Abaikan, ini adalah taktik 'Sextortion Scam' rawak (Spam).", "risiko": 0}]},
+        {"pengirim": "Netflix Support", "mesej": "Langganan Netflix Premium anda gagal diperbaharui. Akaun akan disekat. Kemas kini kad kredit di: http://my-netflix-update.web.app", "pilihan": [{"teks": "Klik link dan isi nombor kad kredit serta kod CVV.", "risiko": 10}, {"teks": "Klik link cuma nak tengok pelan langganan.", "risiko": 5}, {"teks": "Abaikan mesej tetapi rasa risau langganan terputus.", "risiko": 2}, {"teks": "Buka aplikasi Netflix langsung dari TV atau telefon untuk check.", "risiko": 0}]},
+        {"pengirim": "Polis Bukit Aman", "mesej": "(Panggilan) Ada bungkusan haram mengandungi dadah atas nama anda ditahan di Sabah. Sila sahkan ID akaun bank anda.", "pilihan": [{"teks": "Ikut arahan pindahkan semua wang ke akaun selamat polis.", "risiko": 10}, {"teks": "Menangis dan merayu pada pegawai mendakwa anda tidak bersalah.", "risiko": 5}, {"teks": "Minta nombor ID sarjan tersebut untuk rujukan semula.", "risiko": 2}, {"teks": "Letak telefon serta-merta, polis tidak urus kes guna panggilan.", "risiko": 0}]},
+        {"pengirim": "Voucher Percuma", "mesej": "Mesej forwarded WhatsApp: Sempena Hari Pekerja, McDonald's belanja baucar makan RM100! Tebus di sini: http://mcdonalds-rewards.xyz", "pilihan": [{"teks": "Klik link dan isi nombor telefon serta OTP akaun ShopeePay.", "risiko": 10}, {"teks": "Klik link isi survey tapi tak letak nombor OTP.", "risiko": 5}, {"teks": "Forward mesej tersebut ke grup WhatsApp taman perumahan.", "risiko": 2}, {"teks": "Padam, domain pelik `.xyz` bukan laman rasmi McD.", "risiko": 0}]},
+        {"pengirim": "Guru Sekolah Anak", "mesej": "WhatsApp: Selamat petang puan, sila muat turun fail senarai tunggakan yuran PIBG anak puan di sini: Fail_Yuran.apk", "pilihan": [{"teks": "Download dan install APK tersebut kerana takut anak malu.", "risiko": 10}, {"teks": "Download fail tersebut tapi tidak tekan install.", "risiko": 5}, {"teks": "Tanya grup WhatsApp sekolah sama ada orang lain dapat fail.", "risiko": 2}, {"teks": "Hubungi cikgu tersebut melalui panggilan telefon biasa.", "risiko": 0}]},
+        {"pengirim": "Pegawai MCMC", "mesej": "(Panggilan) Nombor kad pengenalan anda didapati mendaftar 5 nombor telefon lain untuk kes penipuan siber di Kedah.", "pilihan": [{"teks": "Berikan semua maklumat perbankan untuk proses audit siber.", "risiko": 10}, {"teks": "Benarkan panggilan tersebut disambungkan ke 'IPD Kedah'.", "risiko": 5}, {"teks": "Dengar arahan mereka dengan rasa takut.", "risiko": 2}, {"teks": "Letak telefon, MCMC tidak membuat sambungan ke balai polis.", "risiko": 0}]},
+        {"pengirim": "Kripto Instagram", "mesej": "Pelaburan Bitcoin Terjamin! Labur RM500 dapat pulangan RM15,000 dalam masa 3 jam sahaja. Dijamin halal.", "pilihan": [{"teks": "Mesej admin tersebut dan buat bayaran deposit modal.", "risiko": 10}, {"teks": "Tanya di ruangan komen jika pelaburan ini betul.", "risiko": 5}, {"teks": "Like post tersebut sahaja.", "risiko": 2}, {"teks": "Abaikan dan sekat profil, tiada pelaburan untung kilat.", "risiko": 0}]},
+        {"pengirim": "Facebook Safety", "mesej": "Akaun Facebook anda melanggar hak cipta komuniti dan akan dipadamkan. Klik pautan rayuan: http://fb-security-appeal.com", "pilihan": [{"teks": "Klik pautan dan log masuk menggunakan password FB anda.", "risiko": 10}, {"teks": "Klik pautan cuma nak tengok post mana yang salah.", "risiko": 5}, {"teks": "Balas e-mel notifikasi tersebut dengan kata rayuan.", "risiko": 2}, {"teks": "Abaikan, notifikasi keselamatan rasmi hanya ada dalam app FB.", "risiko": 0}]},
+        {"pengirim": "Ejen Telco Murah", "mesej": "(Panggilan) Kami tawarkan Pelan Unlimited RM15 sebulan untuk setia bersama kami. Sila bacakan kod SMS 6-angka yang anda terima.", "pilihan": [{"teks": "Sebutkan kod SMS 6-angka (OTP) tersebut kepada ejen.", "risiko": 10}, {"teks": "Minta ejen call balik 10 minit lagi sebab tengah sibuk.", "risiko": 5}, {"teks": "Dengar sahaja penjelasan tanpa bagi apa-apa kod.", "risiko": 2}, {"teks": "Letak telefon, kod SMS tersebut adalah OTP tukar kad sim.", "risiko": 0}]},
+        {"pengirim": "TikTok Live Derma", "mesej": "TikTok Live memaparkan video sedih rumah anak yatim terbakar dengan paparan kod QR personal untuk kutipan kilat.", "pilihan": [{"teks": "Scan QR kod tersebut dan transfer RM100 tanda sedekah.", "risiko": 10}, {"teks": "Tulis komen 'Semoga dipermudahkan urusan' di live.", "risiko": 5}, {"teks": "Tengok live tersebut dalam masa lama.", "risiko": 2}, {"teks": "Semak senarai pertubuhan derma sah di portal rasmi JAKIM.", "risiko": 0}]},
+        {"pengirim": "Emas 916 Murah", "mesej": "Iklan IG: Jualan Gudang Kecemasan! Rantai Emas Leher 916 Tulen hanya RM150 segram (Harga Pasaran RM330). Stok Terhad!", "pilihan": [{"teks": "Terus bank-in RM1,500 ke akaun personal yang tertera.", "risiko": 10}, {"teks": "Minta ejen tunjuk sijil ketulenan emas melalui WhatsApp.", "risiko": 5}, {"teks": "Simpan gambar iklan tersebut dalam galeri telefon.", "risiko": 2}, {"teks": "Abaikan, harga tak masuk akal adalah taktik umpan scammer.", "risiko": 0}]},
+        {"pengirim": "Aplikasi Intip", "mesej": "WhatsApp: Mahu intip lokasi kekasih atau pasang pengesan mesej pasangan? Guna app rahsia percuma ini: spy-tracker.apk", "pilihan": [{"teks": "Download dan pasang APK tersebut untuk cuba mengintip.", "risiko": 10}, {"teks": "Download fail APK tersebut tetapi belum tekan install.", "risiko": 5}, {"teks": "Tanya rakan karib sama ada app itu berkesan.", "risiko": 2}, {"teks": "Abaikan fail, ia adalah malware pencuri log akaun bank.", "risiko": 0}]},
+        {"pengirim": "Peguam Luar Negara", "mesej": "E-mel: Jutawan asing yang mempunyai nama keluarga sama seperti anda telah meninggal dunia. Anda layak tuntut warisan harta RM10 Juta.", "pilihan": [{"teks": "Hantar maklumat bank penuh beserta yuran proses RM1,000.", "risiko": 10}, {"teks": "Balas e-mel bertanya cara tuntutan harta warisan.", "risiko": 5}, {"teks": "Simpan e-mel tersebut dalam folder kegemaran.", "risiko": 2}, {"teks": "Padam e-mel, ini taktik penipuan klasik '419 Nigerian Scam'.", "risiko": 0}]},
+        {"pengirim": "FB Umrah Murah", "mesej": "Pakej Umrah VVIP Rahmah 2026 hanya RM4,999 seorang! Hotel depan Kaabah. Bayar deposit RM500 ke akaun: 1004XXXXX (Ali Enterprise).", "pilihan": [{"teks": "Transfer deposit modal RM500 sebab kuota terhad.", "risiko": 10}, {"teks": "Minta gambar bilik hotel depan Kaabah daripada ejen.", "risiko": 5}, {"teks": "Tengok sahaja post iklan tersebut tanpa bertindak.", "risiko": 2}, {"teks": "Semak lesen ejen pelancongan di portal rasmi MOTAC.", "risiko": 0}]},
+        {"pengirim": "Khairat Kematian", "mesej": "SMS: Bantuan Khairat Kematian Komuniti RM1,000 diluluskan untuk keluarga anda. Sila sahkan ID akaun bank anda di: http://bantuan-khairat.xyz", "pilihan": [{"teks": "Klik link pautan dan isi borang login perbankan internet.", "risiko": 10}, {"teks": "Klik link pautan cuma nak tengok syarat kelayakan.", "risiko": 5}, {"teks": "Biarkan SMS tersebut di dalam peti masuk mesej.", "risiko": 2}, {"teks": "Sahkan dengan ketua kampung atau pejabat kebajikan daerah.", "risiko": 0}]}
     ]
 
+    # PROSES PENJANAAN RAWAK: 10 SOALAN DARI 30 + SHUFFLE KEDUDUKAN JAWAPAN
     if "soalan_shuffled" not in st.session_state:
-        st.session_state.soalan_shuffled = random.sample(semua_soalan, len(semua_soalan))
+        # Memilih 10 soalan secara rawak dari takungan 30 soalan
+        selected_questions = random.sample(semua_soalan, 10)
+        shuffled_questions = []
+        
+        # Mengacak kedudukan jawapan dalam setiap soalan secara bebas (Anti-Pattern Clumping)
+        for q in selected_questions:
+            q_copy = copy.deepcopy(q)
+            random.shuffle(q_copy["pilihan"])
+            shuffled_questions.append(q_copy)
+            
+        st.session_state.soalan_shuffled = shuffled_questions
         st.session_state.soalan_semasa = 0
         st.session_state.skor_risiko = 0
         st.session_state.kuiz_tamat = False
@@ -326,6 +360,8 @@ with tab2:
         with st.chat_message("user", avatar="👤"):
             st.write(senario['mesej'])
         st.write("👇 **Apakah tindakan refleks digital anda?**")
+        
+        # Memaparkan butang padu biru dengan susunan jawapan yang telah diacak rawak
         for i, pil in enumerate(senario['pilihan']):
             if st.button(pil['teks'], key=f"btn_{idx}_{i}", use_container_width=True):
                 st.session_state.skor_risiko += pil['risiko']
