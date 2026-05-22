@@ -41,29 +41,53 @@ def generate_warning_card(status, ulasan):
     img = Image.new('RGB', (800, 450), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     
+    # Menguruskan saiz tulisan secara dinamik (Sokongan Pillow Moden)
+    try:
+        font_small = ImageFont.load_default(size=16)
+        font_ulasan = ImageFont.load_default(size=24)   # Saiz ulasan digandakan lebih besar
+        font_header = ImageFont.load_default(size=28)   # Saiz pengepala status utama
+    except:
+        font_small = ImageFont.load_default()
+        font_ulasan = ImageFont.load_default()
+        font_header = ImageFont.load_default()
+    
     # Menentukan tema warna berdasarkan klasifikasi siber
     theme_color = (239, 68, 68) if status == "SCAM BAHAYA" else (34, 197, 94)
     
     # Melukis jalur sisi keselamatan
     draw.rectangle([0, 0, 25, 450], fill=theme_color)
     
-    # Menulis teks pengepala status
-    draw.text((60, 40), f"PERISAI KESELAMATAN ANTILOLOS", fill=(100, 116, 139))
-    draw.text((60, 75), f"STATUS KELAS: {status}", fill=theme_color)
-    draw.text((60, 130), "Hasil Keputusan Imbasan AI:", fill=(30, 41, 59))
+    # Menulis teks pengepala atas
+    draw.text((60, 40), "PERISAI KESELAMATAN ANTILOLOS", fill=(100, 116, 139), font=font_small)
     
-    # Memotong ulasan teks automatik agar muat dalam grid imej
-    ulasan_dipotong = ulasan[:120] + "..." if len(ulasan) > 120 else ulasan
-    lines = [ulasan_dipotong[i:i+45] for i in range(0, len(ulasan_dipotong), 45)]
+    # Format teks status utama mengikut citarasa baru (Format Tepat)
+    if status == "SCAM BAHAYA":
+        header_text = "STATUS KELAS SCAM : BAHAYA!!"
+    else:
+        header_text = "STATUS KELAS : SELAMAT"
+        
+    # Memberi kesan BOLD pada teks status utama dengan teknik tindanan piksel
+    for dx in [0, 1]:
+        for dy in [0, 1]:
+            draw.text((60 + dx, 75 + dy), header_text, fill=theme_color, font=font_header)
+            
+    draw.text((60, 140), "Hasil Keputusan Imbasan AI:", fill=(71, 85, 105), font=font_small)
     
+    # Memotong ulasan teks automatik (Dikecilkan julat karakter kerana saiz tulisan sudah besar)
+    ulasan_dipotong = ulasan[:100] + "..." if len(ulasan) > 100 else ulasan
+    lines = [ulasan_dipotong[i:i+32] for i in range(0, len(ulasan_dipotong), 32)]
+    
+    # Melukis teks ulasan dengan kesan BOLD (Tulisan Tebal & Besar)
     current_y = 175
     for line in lines:
-        draw.text((60, current_y), line, fill=(71, 85, 105))
-        current_y += 35
+        for dx in [0, 1, 2]: # Tindanan extra untuk impak tulisan tebal yang jelas
+            for dy in [0, 1, 2]:
+                draw.text((60 + dx, current_y + dy), line, fill=(15, 23, 42), font=font_ulasan)
+        current_y += 42
         
     # Kaki kad visual
     draw.rectangle([60, 390, 740, 392], fill=(226, 232, 240))
-    draw.text((60, 405), "Semak mesej mencurigakan anda di: antilolos.streamlit.app", fill=(148, 163, 184))
+    draw.text((60, 405), "Semak mesej mencurigakan anda di: antilolos.streamlit.app", fill=(148, 163, 184), font=font_small)
     
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='PNG')
@@ -89,7 +113,7 @@ if choice == "🔍 Pengesan Scam":
         else:
             with st.spinner("AntiLolos AI sedang mengimbas corak penipuan siber..."):
                 
-                # Memeriksa pangkalan data komuniti (Supabase Caching) mengikut skrip SQL asal
+                # Memeriksa pangkalan data komuniti (Supabase Caching - Huruf Kecil)
                 db_query = supabase.table("scam_logs").select("*").eq("teks_laporan", user_input.strip()).execute()
                 
                 if db_query.data:
@@ -98,10 +122,11 @@ if choice == "🔍 Pengesan Scam":
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
                 else:
                     try:
+                        # Menggunakan model terkini yang aktif dan hijau kuotanya
                         model = genai.GenerativeModel('gemini-2.5-flash')
                         system_instruction = (
                             "Anda adalah pakar keselamatan siber terlatih di Malaysia. Analisis mesej di bawah. "
-                            "Tentukan klasifikasi sama ada ia 'SCAM BAHAYA' atau 'SELAMAT/SAH'. "
+                            "Tentukan klasifikasi sama ada ia 'SCAM BAHAYA' or 'SELAMAT/SAH'. "
                             "Berikan ulasan yang ringkas, kasual, dan mudah difahami oleh warga emas. "
                             "Format output wajib dimulakan dengan baris pertama: KATEGORI: [SCAM BAHAYA atau SELAMAT]"
                         )
@@ -158,7 +183,7 @@ elif choice == "🎯 Ujian Kekebalan":
         {"pengirim": "011-3482XXXX", "mesej": "Salam bro, aku Shah ni. Tersalah hantar kod TAC kat fon kau. Boleh forward balik tak? Urgent!", "pilihan": [{"teks": "Salin dan hantar kod TAC terus sebab nak tolong kawan.", "risiko": 10}, {"teks": "Tanya dia balik 'Kau Shah yang mana satu?'", "risiko": 5}, {"teks": "Maki pengirim sebab curiga ini scammer.", "risiko": 2}, {"teks": "Abaikan, sekat nombor, dan call nombor sebenar Shah.", "risiko": 0}]},
         {"pengirim": "SMS Bank", "mesej": "AMARAN! Akaun anda diakses peranti asing. Sekat segera di: http://maybank-security-lock.com", "pilihan": [{"teks": "Panik dan terus klik link untuk tukar password.", "risiko": 10}, {"teks": "Klik link tapi sekadar nak tengok rupa website.", "risiko": 5}, {"teks": "Balas SMS tersebut 'Ini tipu!'", "risiko": 2}, {"teks": "Abaikan SMS dan buka aplikasi rasmi bank secara berasingan.", "risiko": 0}]},
         {"pengirim": "Pegawai LHDN", "mesej": "Tunggakan cukai RM4,820. Waran sita rumah dalam 3 jam. Bayar ke akaun agensi: 1642XXX.", "pilihan": [{"teks": "Takut kena sita, terus buat pindahan wang.", "risiko": 10}, {"teks": "Minta diskaun atau tempoh lanjutan bayaran.", "risiko": 5}, {"teks": "Letak telefon, tapi masih rasa risau dan panik.", "risiko": 2}, {"teks": "Letak panggilan dan semak terus di portal rasmi MyTax.", "risiko": 0}]},
-        {"pengirim": "Grup Telegram", "mesej": " PeluANG EMAS! Pelaburan Syariah Ustaz Jamil. Modal RM300, pulangan RM5,000 dalam 24 jam.", "pilihan": [{"teks": "Keluarkan RM300 untuk cuba nasib.", "risiko": 10}, {"teks": "Tanya ahli grup lain sama ada mereka dah dapat duit.", "risiko": 5}, {"teks": "Hanya perhati (silent reader) tanpa buat apa-apa.", "risiko": 2}, {"teks": "Report grup tersebut dan Leave Group terus.", "risiko": 0}]},
+        {"pengirim": "Grup Telegram", "mesej": "Pelaburan Syariah Ustaz Jamil. Modal RM300, pulangan RM5,000 dalam 24 jam.", "pilihan": [{"teks": "Keluarkan RM300 untuk cuba nasib.", "risiko": 10}, {"teks": "Tanya ahli grup lain sama ada mereka dah dapat duit.", "risiko": 5}, {"teks": "Hanya perhati (silent reader) tanpa buat apa-apa.", "risiko": 2}, {"teks": "Report grup tersebut dan Leave Group terus.", "risiko": 0}]},
         {"pengirim": "Iklan Facebook", "mesej": "Telefon anda ada 14 virus! Pasang SecureCleaner.apk sekarang untuk selamatkan peranti.", "pilihan": [{"teks": "Download dan install APK tersebut cepat-cepat.", "risiko": 10}, {"teks": "Download saja tapi tak install lagi.", "risiko": 5}, {"teks": "Tulis komen marah pada iklan tersebut.", "risiko": 2}, {"teks": "Abaikan iklan dan guna antivirus rasmi di telefon.", "risiko": 0}]},
         {"pengirim": "Pos Laju", "mesej": "Bungkusan ditangguhkan. Sila kemas kini alamat dan bayar RM1.20 di: http://poslaju-redirection.top", "pilihan": [{"teks": "Bayar RM1.20 guna kad debit/kredit.", "risiko": 10}, {"teks": "Isi alamat sahaja tapi tak letak maklumat bank.", "risiko": 5}, {"teks": "Klik link sekadar untuk baca butiran bungkusan.", "risiko": 2}, {"teks": "Abaikan SMS dan semak tracking number di aplikasi kurier.", "risiko": 0}]},
         {"pengirim": "Shopee", "mesej": "Tahniah! Anda menang Cabutan Bertuah RM3,000. Tuntut di: http://shopee-rewards-2026.net", "pilihan": [{"teks": "Klik link dan isi IC beserta nombor akaun bank.", "risiko": 10}, {"teks": "Klik link dan letak nama palsu untuk test.", "risiko": 5}, {"teks": "Tanya customer service Shopee dalam in-app chat.", "risiko": 2}, {"teks": "Abaikan, platform rasmi tak guna domain pelik macam .net.", "risiko": 0}]},
