@@ -1,4 +1,4 @@
-name: Threat Intel Scraper
+name: Automated Daily Threat Intel Scraper
 
 on:
   push:
