@@ -134,12 +134,11 @@ if status == "SCAM BAHAYA":
         # Paparan untuk status Selamat
         st.markdown(f"<div class='safe-card'><h3>✅ STATUS: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
 
-    # Butang Kongsi WhatsApp (di luar if/elif supaya muncul untuk kedua-dua status)
+    # Butang Kongsi WhatsApp
     if status != "RALAT":
         encoded_text = urllib.parse.quote(share_text)
         whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_text}"
-        st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
-# ==========================================
+        st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)# ==========================================
 # SEGMEN 2: 🎯 UJIAN KEKEBALAN (KUIZ INTERAKTIF MOCK WHATSAPP)
 # ==========================================
 elif choice == "🎯 Ujian Kekebalan":
