@@ -112,28 +112,28 @@ if choice == "🔍 Pengesan Scam":
                         status = "RALAT"
                 
 if status == "SCAM BAHAYA":
-            # Memulakan kotak kad amaran
-            st.markdown(f"<div class='warning-card'>", unsafe_allow_html=True)
-            st.subheader(f"⚠️ AMARAN: {status}")
-            
-            # Jana Kad Gambar
-            image_bytes = generate_warning_card(status, ulasan)
-            st.image(image_bytes, caption="Kad Amaran AntiLolos")
-            
-            # Butang Download
-            st.download_button(
-                label="⬇️ Download Kad Amaran Ini",
-                data=image_bytes,
-                file_name="Amaran_AntiLolos.png",
-                mime="image/png"
-            )
-            # Menutup kotak kad amaran
-            st.markdown("</div>", unsafe_allow_html=True)
+        # Memulakan kotak kad amaran
+        st.markdown(f"<div class='warning-card'>", unsafe_allow_html=True)
+        st.subheader(f"⚠️ AMARAN: {status}")
+        
+        # Jana Kad Gambar
+        image_bytes = generate_warning_card(status, ulasan)
+        st.image(image_bytes, caption="Kad Amaran AntiLolos")
+        
+        # Butang Download
+        st.download_button(
+            label="⬇️ Download Kad Amaran Ini",
+            data=image_bytes,
+            file_name="Amaran_AntiLolos.png",
+            mime="image/png"
+        )
+        # Menutup kotak kad amaran
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        elif status == "SELAMAT":
-            # Paparan untuk status Selamat
-            st.markdown(f"<div class='safe-card'><h3>✅ STATUS: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)                
-                if status != "RALAT":
+    elif status == "SELAMAT":
+        # Paparan untuk status Selamat
+        st.markdown(f"<div class='safe-card'><h3>✅ STATUS: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
+        if status != "RALAT":
                     encoded_text = urllib.parse.quote(share_text)
                     whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_text}"
                     st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
