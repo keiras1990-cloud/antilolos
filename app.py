@@ -21,7 +21,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
 
 # ==========================================
-# 2. SUNTIKAN GAYA REKAAN KHAS (MOBILE-FIRST & PREMIUM BUTTONS)
+# 2. SUNTIKAN GAYA REKAAN KHAS (SOLID BUTTONS & ANTI-DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
@@ -30,7 +30,7 @@ st.markdown("""
         background-color: #f8fafc !important;
     }
     
-    /* Menghalang semua jenis tulisan daripada bertukar menjadi putih secara automatik */
+    /* Menghalang jenis tulisan teks biasa daripada bertukar menjadi putih secara automatik */
     h1, h2, h3, h4, h5, h6, p, span, label, li, small, time {
         color: #1e293b !important;
     }
@@ -65,59 +65,60 @@ st.markdown("""
     /* Konfigurasi asas semua butang agar mesra skrin telefon */
     .stButton>button, .stDownloadButton>button { 
         border-radius: 25px !important; 
-        font-weight: bold !important; 
-        transition: all 0.25s ease-in-out; 
+        transition: all 0.2s ease-in-out; 
         padding: 14px 24px !important; 
         width: 100% !important;
         display: block !important;
         height: auto !important;
     }
     
-    /* Gaya Rekaan Khusus Butang Muat Turun (Download Button) Premium */
+    /* [SANGAT IMPAK] Memaksa Teks Di Dalam Semua Butang Padu Kekal Putih Bersih Semasa Mod Gelap */
+    div.stButton > button, div.stButton > button *, 
+    .stDownloadButton > button, .stDownloadButton > button * {
+        color: #ffffff !important;
+    }
+    
+    /* Gaya Rekaan Khusus Butang Muat Turun (Download Button) Premium (Solid Blue) */
     .stDownloadButton>button {
         background-color: #2563eb !important; 
-        color: #ffffff !important; 
         border: none !important;
         text-align: center !important;
+        font-weight: bold !important;
         box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
     .stDownloadButton>button:hover {
         background-color: #1d4ed8 !important;
-        color: #ffffff !important;
         transform: translateY(-1px);
     }
     
-    /* [PERBAIKAN MUTLAK] Menukarkan Kotak Soalan Menjadi Butang Berwarna Asal Padu & Menyerlah */
-    .stButton>button[data-testid="baseButton-secondary"] { 
-        background-color: #e0f2fe !important;         /* Warna asal solid (Biru Lembut Premium) */
-        color: #0369a1 !important;                    /* Tulisan biru pekat kontras tinggi */
-        border: 2px solid #7dd3fc !important;          /* Sempadan border yang ketara dari awal */
-        box-shadow: 0px 4px 10px rgba(3, 105, 161, 0.08) !important; /* Membuatkan butang nampak timbul */
+    /* [REKAAN BARU] Menukarkan Kotak Kuiz Menjadi Kad Biru Padu Menyerlah Sama Macam Download */
+    div.stButton > button[data-testid="baseButton-secondary"],
+    div.stButton > button:not([data-testid="baseButton-primary"]) { 
+        background-color: #2563eb !important;         /* Warna biru padu (solid) dari awal lagi */
+        border: none !important;
+        box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.15) !important; /* Bayang menyerlah */
         white-space: normal !important;      
-        text-align: left !important;         
+        text-align: left !important;                 /* Susun dari kiri untuk teks soalan panjang */
         word-break: break-word !important;   
         font-weight: 600 !important;                  
     }
     
-    /* Kesan interaktif apabila butang kuiz disentuh atau dipilih */
-    .stButton>button[data-testid="baseButton-secondary"]:hover,
-    .stButton>button[data-testid="baseButton-secondary"]:active,
-    .stButton>button[data-testid="baseButton-secondary"]:focus { 
-        border-color: #ef4444 !important;
-        background-color: #fef2f2 !important;
-        color: #ef4444 !important;
-        box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.12) !important;
+    /* Kesan warna berbeza apabila butang kuiz disentuh atau ditekan */
+    div.stButton > button[data-testid="baseButton-secondary"]:hover,
+    div.stButton > button:not([data-testid="baseButton-primary"]):hover { 
+        background-color: #1d4ed8 !important;        /* Biru gelap korporat semasa hover */
+        box-shadow: 0px 6px 16px rgba(37, 99, 235, 0.25) !important;
     }
     
-    /* Warna khusus untuk Butang Utama (Semak Mesej) */
-    .stButton>button[data-testid="baseButton-primary"] { 
+    /* Warna khusus untuk Butang Utama (Semak Mesej - Solid Red) */
+    div.stButton > button[data-testid="baseButton-primary"] { 
         background-color: #ef4444 !important; 
-        color: #ffffff !important; 
         border: none !important;
         text-align: center !important;       
+        font-weight: bold !important;
         box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.2) !important;
     }
-    .stButton>button[data-testid="baseButton-primary"]:hover {
+    div.stButton > button[data-testid="baseButton-primary"]:hover {
         background-color: #dc2626 !important;
         transform: translateY(-1px);
     }
@@ -303,10 +304,10 @@ with tab2:
         {"pengirim": "Pegawai LHDN", "mesej": "Tunggakan cukai RM4,820. Waran sita rumah dalam 3 jam. Bayar ke akaun agensi: 1642XXX.", "pilihan": [{"teks": "Takut kena sita, terus buat pindahan wang.", "risiko": 10}, {"teks": "Minta diskaun atau tempoh lanjutan bayaran.", "risiko": 5}, {"teks": "Letak telefon, tapi masih rasa risau dan panik.", "risiko": 2}, {"teks": "Letak panggilan dan semak terus di portal rasmi MyTax.", "risiko": 0}]},
         {"pengirim": "Grup Telegram", "mesej": "Pelaburan Syariah Ustaz Jamil. Modal RM300, pulangan RM5,000 dalam 24 jam.", "pilihan": [{"teks": "Keluarkan RM300 untuk cuba nasib.", "risiko": 10}, {"teks": "Tanya ahli grup lain sama ada mereka dah dapat duit.", "risiko": 5}, {"teks": "Hanya perhati (silent reader) tanpa buat apa-apa.", "risiko": 2}, {"teks": "Report grup tersebut dan Leave Group terus.", "risiko": 0}]},
         {"pengirim": "Iklan Facebook", "mesej": "Telefon anda ada 14 virus! Pasang SecureCleaner.apk sekarang untuk selamatkan peranti.", "pilihan": [{"teks": "Download dan install APK tersebut cepat-cepat.", "risiko": 10}, {"teks": "Download saja tapi tak install lagi.", "risiko": 5}, {"teks": "Tulis komen marah pada iklan tersebut.", "risiko": 2}, {"teks": "Abaikan iklan dan guna antivirus rasmi di telefon.", "risiko": 0}]},
-        {"pengirim": "Pos Laju", "mesej": "Bungkusan ditangguhkan. Sila kemas kini alamat dan bayar RM1.20 di: http://poslaju-redirection.top", "pilihan": [{"teks": "Bayar RM1.20 guna kad debit/kredit.", "risiko": 10}, {"teks": "Isi alamat sahaja tapi tak letak maklumat bank.", "risiko": 5}, {"teks": "Klik link sekadar untuk baca butiran bungkusan.", "risiko": 2}, {"teks": "Abaikan SMS dan semak tracking number di aplikasi kurier.", "risiko": 0}]},
+        {"pengirim": "Pos Laju", "mesej": "Bungkusan ditangguhkan. Sila kemas kini alamat and bayar RM1.20 di: http://poslaju-redirection.top", "pilihan": [{"teks": "Bayar RM1.20 guna kad debit/kredit.", "risiko": 10}, {"teks": "Isi alamat sahaja tapi tak letak maklumat bank.", "risiko": 5}, {"teks": "Klik link sekadar untuk baca butiran bungkusan.", "risiko": 2}, {"teks": "Abaikan SMS dan semak tracking number di aplikasi kurier.", "risiko": 0}]},
         {"pengirim": "Shopee", "mesej": "Tahniah! Anda menang Cabutan Bertuah RM3,000. Tuntut di: http://shopee-rewards-2026.net", "pilihan": [{"teks": "Klik link dan isi IC beserta nombor akaun bank.", "risiko": 10}, {"teks": "Klik link dan letak nama palsu untuk test.", "risiko": 5}, {"teks": "Tanya customer service Shopee dalam in-app chat.", "risiko": 2}, {"teks": "Abaikan, platform rasmi tak guna domain pelik macam .net.", "risiko": 0}]},
         {"pengirim": "Mahkamah Tinggi", "mesej": "(Panggilan Suara) Anda didapati terlibat kes gubahan wang haram. Tekan 1 untuk bercakap dengan pegawai.", "pilihan": [{"teks": "Tekan 1 dan ikut arahan pemanggil sebab takut.", "risiko": 10}, {"teks": "Tekan 1 tapi niat nak main-mainkan pemanggil.", "risiko": 5}, {"teks": "Dengar sampai habis tanpa cakap apa-apa.", "risiko": 2}, {"teks": "Letak telefon serta-merta.", "risiko": 0}]},
-        {"pengirim": "SMS Komuniti", "mesej": "Pinjaman syariah lulus 30 min. RM5,000 bulan RM120. WhatsApp: wa.me/6011xxxx", "pilihan": [{"teks": "WhatsApp nombor tu sebab tengah sengkek.", "risiko": 10}, {"teks": "Simpan nombor tu kot-kot terdesak nanti.", "risiko": 5}, {"teks": "Padam SMS tersebut sahaja.", "risiko": 2}, {"teks": "Padam and terus Block nombor pengirim.", "risiko": 0}]},
+        {"pengirim": "SMS Komuniti", "mesej": "Pinjaman syariah lulus 30 min. RM5,000 bulan RM120. WhatsApp: wa.me/6011xxxx", "pilihan": [{"teks": "WhatsApp nombor tu sebab tengah sengkek.", "risiko": 10}, {"teks": "Simpan nombor tu kot-kot terdesak nanti.", "risiko": 5}, {"teks": "Padam SMS tersebut sahaja.", "risiko": 2}, {"teks": "Padam dan terus Block nombor pengirim.", "risiko": 0}]},
         {"pengirim": "Mesej Viral", "mesej": "Bantuan e-Dompet RM300 dibuka! Tebus kredit percuma di: http://bantuan-tunai-gov.xyz", "pilihan": [{"teks": "Klik dan log masuk guna ID perbankan internet.", "risiko": 10}, {"teks": "Share link tu kat kawan lain suruh diorang cuba dulu.", "risiko": 5}, {"teks": "Klik link untuk tengok siapa yang buat website tu.", "risiko": 2}, {"teks": "Abaikan dan rujuk portal rasmi Kementerian Kewangan.", "risiko": 0}]}
     ]
 
