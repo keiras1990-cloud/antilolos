@@ -111,22 +111,26 @@ if choice == "🔍 Pengesan Scam":
                         st.error("Sistem mengalami kelengahan teknikal.")
                         status = "RALAT"
                 
-                if status == "SCAM BAHAYA":
-                    # ... selepas dapat status dan ulasan ...
-
-# Jana Kad Gambar
-image_bytes = generate_warning_card(status, ulasan)
-
-# Papar Gambar
-st.image(image_bytes, caption="Kad Amaran AntiLolos")
-
-# Butang Download
-st.download_button(
-    label="⬇️ Download Kad Amaran Ini",
-    data=image_bytes,
-    file_name="Amaran_AntiLolos.png",
-    mime="image/png"
-)
+if status == "SCAM BAHAYA":
+            # Memulakan kotak kad amaran
+            st.markdown(f"<div class='warning-card'>", unsafe_allow_html=True)
+            st.subheader(f"⚠️ AMARAN: {status}")
+            
+            # Jana Kad Gambar
+            image_bytes = generate_warning_card(status, ulasan)
+            
+            # Papar Gambar
+            st.image(image_bytes, caption="Kad Amaran AntiLolos")
+            
+            # Butang Download
+            st.download_button(
+                label="⬇️ Download Kad Amaran Ini",
+                data=image_bytes,
+                file_name="Amaran_AntiLolos.png",
+                mime="image/png"
+            )
+            # Menutup kotak kad amaran
+            st.markdown("</div>", unsafe_allow_html=True)
                     st.markdown(f"<div class='scam-card'><h3>⚠️ AMARAN: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
                     share_text = f"*🚨 PERISAI AMARAN ANTILOLOS 🚨*\nMesej disemak: _\"{user_input[:40]}...\"_\n*Keputusan AI:* ⚠️ {ulasan}\nSemak di: https://antilolos.streamlit.app"
                 elif status == "SELAMAT":
