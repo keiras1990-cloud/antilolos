@@ -46,7 +46,7 @@ if choice == "🔍 Pengesan Scam":
             with st.spinner("AntiLolos AI sedang mengimbas corak penipuan..."):
                 
                 # Enjin Caching Supabase
-                db_query = supabase.table("Scam_Logs").select("*").eq("Teks_Laporan", user_input.strip()).execute()
+                db_query = supabase.table("scam_logs").select("*").eq("Teks_Laporan", user_input.strip()).execute()
                 
                 if db_query.data:
                     status = db_query.data[0]["Klasifikasi_Gemini"]
