@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import urllib.parse
 import random
+import textwrap
 
 # ==========================================
 # 1. KONFIGURASI PASAK UTAMA & AMANAH DATA
@@ -44,7 +45,7 @@ def generate_warning_card(status, ulasan):
     # Menguruskan saiz tulisan secara dinamik (Sokongan Pillow Moden)
     try:
         font_small = ImageFont.load_default(size=16)
-        font_ulasan = ImageFont.load_default(size=24)   # Saiz ulasan digandakan lebih besar
+        font_ulasan = ImageFont.load_default(size=24)   # Saiz tulisan ulasan yang besar dan jelas
         font_header = ImageFont.load_default(size=28)   # Saiz pengepala status utama
     except:
         font_small = ImageFont.load_default()
@@ -60,30 +61,34 @@ def generate_warning_card(status, ulasan):
     # Menulis teks pengepala atas
     draw.text((60, 40), "PERISAI KESELAMATAN ANTILOLOS", fill=(100, 116, 139), font=font_small)
     
-    # Format teks status utama mengikut citarasa baru (Format Tepat)
+    # Format teks status utama mengikut permintaan baharu anda
     if status == "SCAM BAHAYA":
         header_text = "STATUS KELAS SCAM : BAHAYA!!"
     else:
         header_text = "STATUS KELAS : SELAMAT"
         
-    # Memberi kesan BOLD pada teks status utama dengan teknik tindanan piksel
+    # Memberi kesan tebal (bold) terkawal pada bahagian pengepala utama sahaja
     for dx in [0, 1]:
         for dy in [0, 1]:
             draw.text((60 + dx, 75 + dy), header_text, fill=theme_color, font=font_header)
             
     draw.text((60, 140), "Hasil Keputusan Imbasan AI:", fill=(71, 85, 105), font=font_small)
     
-    # Memotong ulasan teks automatik (Dikecilkan julat karakter kerana saiz tulisan sudah besar)
-    ulasan_dipotong = ulasan[:100] + "..." if len(ulasan) > 100 else ulasan
-    lines = [ulasan_dipotong[i:i+32] for i in range(0, len(ulasan_dipotong), 32)]
+    # MEMBERSIHKAN TEKS: Buang simbol asterisks (**) daripada ulasan AI
+    ulasan_bersih = ulasan.replace("**", "")
     
-    # Melukis teks ulasan dengan kesan BOLD (Tulisan Tebal & Besar)
+    # PEMOTONGAN PINTAR: Menyusun perenggan mengikut sempadan perkataan (Word-wrap)
+    # Lebar 45 karakter adalah saiz optimum bagi tulisan saiz 24 pada kanvas lebar 800px
+    lines = textwrap.wrap(ulasan_bersih, width=45)
+    
+    # Memastikan tulisan tidak terkeluar dari sempadan bawah kad (Maksimum 5 baris)
+    lines = lines[:5]
+    
+    # Melukis ulasan secara bersih, tajam dan teratur tanpa gangguan pertindihan huruf
     current_y = 175
     for line in lines:
-        for dx in [0, 1, 2]: # Tindanan extra untuk impak tulisan tebal yang jelas
-            for dy in [0, 1, 2]:
-                draw.text((60 + dx, current_y + dy), line, fill=(15, 23, 42), font=font_ulasan)
-        current_y += 42
+        draw.text((60, current_y), line, fill=(15, 23, 42), font=font_ulasan)
+        current_y += 38
         
     # Kaki kad visual
     draw.rectangle([60, 390, 740, 392], fill=(226, 232, 240))
@@ -122,11 +127,11 @@ if choice == "🔍 Pengesan Scam":
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
                 else:
                     try:
-                        # Menggunakan model terkini yang aktif dan hijau kuotanya
+                        # Menggunakan model versi 2.5 flash yang aktif dan hijau kuotanya
                         model = genai.GenerativeModel('gemini-2.5-flash')
                         system_instruction = (
                             "Anda adalah pakar keselamatan siber terlatih di Malaysia. Analisis mesej di bawah. "
-                            "Tentukan klasifikasi sama ada ia 'SCAM BAHAYA' or 'SELAMAT/SAH'. "
+                            "Tentukan klasifikasi sama ada ia 'SCAM BAHAYA' atau 'SELAMAT/SAH'. "
                             "Berikan ulasan yang ringkas, kasual, dan mudah difahami oleh warga emas. "
                             "Format output wajib dimulakan dengan baris pertama: KATEGORI: [SCAM BAHAYA atau SELAMAT]"
                         )
@@ -172,7 +177,7 @@ if choice == "🔍 Pengesan Scam":
                     st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
 
 # ==========================================
-# SEGMEN 2: 🎯 UJIAN KEKEBALAN (KUIZ PENUH & MATANG)
+# SEGMEN 2: 🎯 UJIAN KEKEBALAN (KUIZ PENUH)
 # ==========================================
 elif choice == "🎯 Ujian Kekebalan":
     st.title("🎯 Ujian Kekebalan Digital")
