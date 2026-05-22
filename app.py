@@ -59,7 +59,7 @@ if choice == "🔍 Pengesan Scam":
             st.warning("Sila masukkan teks mesej terlebih dahulu.")
         else:
             with st.spinner("AntiLolos AI sedang mengimbas..."):
-                db_query = supabase.table("Scam_Logs").select("*").eq("Teks_Laporan", user_input.strip()).execute()
+                db_query = supabase.table("scam_logs").select("*").eq("teks_laporan", user_input.strip()).execute()
                 if db_query.data:
                     status = db_query.data[0]["Klasifikasi_Gemini"]
                     ulasan = db_query.data[0]["Ulasan_AI"]
@@ -69,7 +69,11 @@ if choice == "🔍 Pengesan Scam":
                         output_text = model.generate_content(f"Analisis mesej ini: {user_input}. Format: KATEGORI: [SCAM BAHAYA atau SELAMAT]. Ulasan: [Ringkas].").text
                         status = "SCAM BAHAYA" if "KATEGORI: SCAM BAHAYA" in output_text else "SELAMAT"
                         ulasan = output_text.replace("KATEGORI: SCAM BAHAYA", "").replace("KATEGORI: SELAMAT", "").strip()
-                        supabase.table("Scam_Logs").insert({"Teks_Laporan": user_input.strip(), "Klasifikasi_Gemini": status, "Ulasan_AI": ulasan}).execute()
+                        supabase.table("scam_logs").insert({
+                            "teks_laporan": user_input.strip(),
+                            "klasifikasi_gemini": status,
+                            "ulasan_ai": ulasan
+                        }).execute()     
                     except:
                         status, ulasan = "RALAT", ""
             
