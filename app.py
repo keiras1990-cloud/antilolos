@@ -67,7 +67,7 @@ if choice == "🔍 Pengesan Scam":
                         status = "SCAM BAHAYA" if "KATEGORI: SCAM BAHAYA" in output_text else "SELAMAT"
                         ulasan = output_text.replace("KATEGORI: SCAM BAHAYA", "").replace("KATEGORI: SELAMAT", "").strip()
                         
-                        supabase.table("Scam_Logs").insert({
+                        supabase.table("scam_logs").insert({
                             "Teks_Laporan": user_input.strip(),
                             "Klasifikasi_Gemini": status,
                             "Ulasan_AI": ulasan
