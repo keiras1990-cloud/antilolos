@@ -15,7 +15,42 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
+import streamlit as st
+from PIL import Image, ImageDraw, ImageFont
+import io
 
+# 1. CSS Glow Up - Tampal ni terus selepas st.set_page_config
+st.markdown("""
+    <style>
+    .stApp { background-color: #f4f7f6; }
+    .stButton>button { border-radius: 20px !important; background-color: #007bff; color: white; font-weight: bold; }
+    .warning-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 10px solid #ff4b4b; }
+    </style>
+""", unsafe_allow_html=True)
+
+# 2. Fungsi Penjana Kad (Warning Card Generator)
+def generate_warning_card(status, ulasan):
+    # Buat latar belakang kad (Putih)
+    img = Image.new('RGB', (800, 400), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    
+    # Warna ikut status
+    color = (255, 75, 75) if status == "SCAM BAHAYA" else (76, 175, 80)
+    
+    # Lukis border kiri
+    draw.rectangle([0, 0, 20, 400], fill=color)
+    
+    # Teks Tajuk & Ulasan
+    # Nota: Font default Pillow mungkin kecil, tapi ni cukup untuk MVP
+    draw.text((50, 50), f"STATUS: {status}", fill=color)
+    draw.text((50, 100), f"Hasil Analisis AI:", fill=(50, 50, 50))
+    draw.text((50, 150), ulasan[:80] + "...", fill=(0, 0, 0)) # Ringkaskan ulasan
+    draw.text((50, 350), "Dijana oleh AntiLolos AI", fill=(150, 150, 150))
+    
+    # Simpan ke memori (buffer)
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    return img_byte_arr.getvalue()
 # Suntikan Gaya Rekaan Khas (Custom CSS)
 st.markdown("""
     <style>
@@ -77,6 +112,21 @@ if choice == "🔍 Pengesan Scam":
                         status = "RALAT"
                 
                 if status == "SCAM BAHAYA":
+                    # ... selepas dapat status dan ulasan ...
+
+# Jana Kad Gambar
+image_bytes = generate_warning_card(status, ulasan)
+
+# Papar Gambar
+st.image(image_bytes, caption="Kad Amaran AntiLolos")
+
+# Butang Download
+st.download_button(
+    label="⬇️ Download Kad Amaran Ini",
+    data=image_bytes,
+    file_name="Amaran_AntiLolos.png",
+    mime="image/png"
+)
                     st.markdown(f"<div class='scam-card'><h3>⚠️ AMARAN: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
                     share_text = f"*🚨 PERISAI AMARAN ANTILOLOS 🚨*\nMesej disemak: _\"{user_input[:40]}...\"_\n*Keputusan AI:* ⚠️ {ulasan}\nSemak di: https://antilolos.streamlit.app"
                 elif status == "SELAMAT":
