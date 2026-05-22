@@ -21,7 +21,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
 
 # ==========================================
-# 2. SUNTIKAN GAYA REKAAN KHAS (KAMPUNG-PROOF & ANTI-DARK MODE)
+# 2. SUNTIKAN GAYA REKAAN KHAS (ANTI-DARK MODE & PREMIUM BUTTONS)
 # ==========================================
 st.markdown("""
     <style>
@@ -66,38 +66,47 @@ st.markdown("""
     .stButton>button, .stDownloadButton>button { 
         border-radius: 25px !important; 
         font-weight: bold !important; 
-        transition: all 0.3s ease; 
-        padding: 12px 24px !important; 
+        transition: all 0.25s ease-in-out; 
+        padding: 14px 24px !important; 
         width: 100% !important;
         display: block !important;
         height: auto !important;
     }
     
-    /* [SANGAT PENTING] Gaya Rekaan Khusus Butang Muat Turun (Download Button) Premium */
+    /* Gaya Rekaan Khusus Butang Muat Turun (Download Button) Premium */
     .stDownloadButton>button {
         background-color: #2563eb !important; 
         color: #ffffff !important; 
         border: none !important;
         text-align: center !important;
+        box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
     .stDownloadButton>button:hover {
         background-color: #1d4ed8 !important;
         color: #ffffff !important;
+        transform: translateY(-1px);
     }
     
-    /* Menjadikan butang pilihan kuiz mesra tulisan panjang pada skrin telefon */
+    /* [PERBAIKAN AGUNG] Menukarkan Kotak Soalan Plain Menjadi Butang Pilihan Kad Premium */
     .stButton>button[data-testid="baseButton-secondary"] { 
         background-color: #ffffff !important; 
-        color: #334155 !important; 
-        border: 1px solid #cbd5e1 !important; 
+        color: #1e293b !important; 
+        border: 2px solid #cbd5e1 !important;        /* Border tebal supaya nampak sempadan butang asal */
+        box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.04) !important; /* Bayang lembut biar butang nampak timbul */
         white-space: normal !important;      
         text-align: left !important;         
         word-break: break-word !important;   
-        font-weight: 500 !important;
+        font-weight: 600 !important;                  /* Tulisan digelapkan dan ditebalkan */
     }
-    .stButton>button[data-testid="baseButton-secondary"]:hover {
+    
+    /* Kesan interaktif apabila butang kuiz disentuh, diklik, atau dipilih */
+    .stButton>button[data-testid="baseButton-secondary"]:hover,
+    .stButton>button[data-testid="baseButton-secondary"]:active,
+    .stButton>button[data-testid="baseButton-secondary"]:focus { 
         border-color: #ef4444 !important;
         background-color: #fef2f2 !important;
+        color: #ef4444 !important;
+        box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.1) !important;
     }
     
     /* Warna khusus untuk Butang Utama (Semak Mesej) */
@@ -106,6 +115,11 @@ st.markdown("""
         color: #ffffff !important; 
         border: none !important;
         text-align: center !important;       
+        box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.2) !important;
+    }
+    .stButton>button[data-testid="baseButton-primary"]:hover {
+        background-color: #dc2626 !important;
+        transform: translateY(-1px);
     }
     
     /* Sentuhan visual responsif untuk kad amaran dan selamat */
