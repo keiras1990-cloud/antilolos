@@ -118,7 +118,7 @@ if choice == "🔍 Pengesan Scam":
                             "ulasan_ai": ulasan
                         }).execute()
                     except Exception as e:
-                        st.error("Sistem mengalami kelengahan teknikal rangkaian.")
+                        st.error(f"Sistem mengalami kelengahan teknikal rangkaian. Ralat: {e}")
                         status = "RALAT"
                 
                 # Paparan keputusan mengikut klasifikasi siber
