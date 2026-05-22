@@ -31,66 +31,76 @@ st.markdown("""
     .scam-card { padding: 25px; border-radius: 15px; background-color: #fff5f5; border-left: 6px solid #ef4444; box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.08); margin-bottom: 25px; }
     .safe-card { padding: 25px; border-radius: 15px; background-color: #f0fdf4; border-left: 6px solid #22c55e; box-shadow: 0px 4px 12px rgba(34, 197, 94, 0.08); margin-bottom: 25px; }
     .report-box { padding: 25px; border-radius: 15px; background-color: #ffffff; border: 2px solid #e2e8f0; text-align: center; box-shadow: 0px 6px 20px rgba(0,0,0,0.04); margin-top: 20px; }
+    
+    /* Gaya Rekaan Khas untuk Senarai Top 10 Aduan */
+    .leaderboard-item { padding: 18px; border-radius: 12px; background-color: #ffffff; border: 1px solid #e2e8f0; margin-bottom: 12px; display: flex; align-items: center; box-shadow: 0px 2px 8px rgba(0,0,0,0.02); }
+    .rank-number { font-size: 22px; font-weight: bold; color: #ef4444; width: 45px; text-align: center; font-family: 'Poppins', sans-serif; }
+    .brand-logo { font-size: 28px; margin-right: 15px; width: 35px; text-align: center; }
+    .scam-details { flex-grow: 1; }
+    .badge-count { background-color: #fee2e2; color: #ef4444; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 13px; min-width: 90px; text-align: center; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. ENJIN GENERATOR KAD VISUAL (PILLOW)
+# 3. HELPER: PENGECAKAN LOGO SQUISHY AUTOMATIK
+# ==========================================
+def dapatkan_logo_scam(teks):
+    teks_lower = teks.lower()
+    if any(x in teks_lower for x in ["maybank", "cimb", "bank", "tac", "bsn", "pbe"]):
+        return "🏦"  # Logo Bank
+    elif any(x in teks_lower for x in ["whatsapp", "wasap", "wa.me"]):
+        return "🟢"  # Logo WhatsApp / Sembang
+    elif any(x in teks_lower for x in ["lhdn", "cukai", "hasil", "mahkamah", "polis", "pdrm"]):
+        return "⚖️"  # Logo Agensi / Undang-undang
+    elif any(x in teks_lower for x in ["pos", "laju", "j&t", "courier", "bungkusan", "parcel"]):
+        return "📦"  # Logo Kurier / Penghantaran
+    elif any(x in teks_lower for x in ["shopee", "lazada", "hadiah", "cabutan", "menang"]):
+        return "🛍️"  # Logo Membeli-belah / Hadiah
+    elif "telegram" in teks_lower:
+        return "✈️"  # Logo Telegram
+    else:
+        return "⚠️"  # Logo Amaran Umum
+
+# ==========================================
+# 4. ENJIN GENERATOR KAD VISUAL (PILLOW)
 # ==========================================
 def generate_warning_card(status, ulasan):
-    # Membina kanvas imej beresolusi tinggi
     img = Image.new('RGB', (800, 450), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     
-    # Menguruskan saiz tulisan secara dinamik (Sokongan Pillow Moden)
     try:
         font_small = ImageFont.load_default(size=16)
-        font_ulasan = ImageFont.load_default(size=24)   # Saiz tulisan ulasan yang besar dan jelas
-        font_header = ImageFont.load_default(size=28)   # Saiz pengepala status utama
+        font_ulasan = ImageFont.load_default(size=24)   
+        font_header = ImageFont.load_default(size=28)   
     except:
         font_small = ImageFont.load_default()
         font_ulasan = ImageFont.load_default()
         font_header = ImageFont.load_default()
     
-    # Menentukan tema warna berdasarkan klasifikasi siber
     theme_color = (239, 68, 68) if status == "SCAM BAHAYA" else (34, 197, 94)
-    
-    # Melukis jalur sisi keselamatan
     draw.rectangle([0, 0, 25, 450], fill=theme_color)
-    
-    # Menulis teks pengepala atas
     draw.text((60, 40), "PERISAI KESELAMATAN ANTILOLOS", fill=(100, 116, 139), font=font_small)
     
-    # Format teks status utama mengikut permintaan baharu anda
     if status == "SCAM BAHAYA":
         header_text = "STATUS KELAS SCAM : BAHAYA!!"
     else:
         header_text = "STATUS KELAS : SELAMAT"
         
-    # Memberi kesan tebal (bold) terkawal pada bahagian pengepala utama sahaja
     for dx in [0, 1]:
         for dy in [0, 1]:
             draw.text((60 + dx, 75 + dy), header_text, fill=theme_color, font=font_header)
             
     draw.text((60, 140), "Hasil Keputusan Imbasan AI:", fill=(71, 85, 105), font=font_small)
     
-    # MEMBERSIHKAN TEKS: Buang simbol asterisks (**) daripada ulasan AI
     ulasan_bersih = ulasan.replace("**", "")
-    
-    # PEMOTONGAN PINTAR: Menyusun perenggan mengikut sempadan perkataan (Word-wrap)
-    # Lebar 45 karakter adalah saiz optimum bagi tulisan saiz 24 pada kanvas lebar 800px
     lines = textwrap.wrap(ulasan_bersih, width=45)
-    
-    # Memastikan tulisan tidak terkeluar dari sempadan bawah kad (Maksimum 5 baris)
     lines = lines[:5]
     
-    # Melukis ulasan secara bersih, tajam dan teratur tanpa gangguan pertindihan huruf
     current_y = 175
     for line in lines:
         draw.text((60, current_y), line, fill=(15, 23, 42), font=font_ulasan)
         current_y += 38
         
-    # Kaki kad visual
     draw.rectangle([60, 390, 740, 392], fill=(226, 232, 240))
     draw.text((60, 405), "Semak mesej mencurigakan anda di: antilolos.streamlit.app", fill=(148, 163, 184), font=font_small)
     
@@ -98,12 +108,12 @@ def generate_warning_card(status, ulasan):
     img.save(img_byte_arr, format='PNG')
     return img_byte_arr.getvalue()
 
-# Mengawal penukaran menu utama
-menu = ["🔍 Pengesan Scam", "🎯 Ujian Kekebalan"]
+# Mengawal penukaran menu utama (Telah ditambah pilihan Tab Ketiga)
+menu = ["🔍 Pengesan Scam", "🎯 Ujian Kekebalan", "📊 Top 10 Aduan"]
 choice = st.radio("Menu", menu, horizontal=True, label_visibility="collapsed")
 
 # ==========================================
-# SEGMEN 1: 🔍 PENGESAN SCAM (LOGIK CACHING + GEMINI)
+# SEGMEN 1: 🔍 PENGESAN SCAM
 # ==========================================
 if choice == "🔍 Pengesan Scam":
     st.title("🛡️ AntiLolos")
@@ -118,7 +128,6 @@ if choice == "🔍 Pengesan Scam":
         else:
             with st.spinner("AntiLolos AI sedang mengimbas corak penipuan siber..."):
                 
-                # Memeriksa pangkalan data komuniti (Supabase Caching - Huruf Kecil)
                 db_query = supabase.table("scam_logs").select("*").eq("teks_laporan", user_input.strip()).execute()
                 
                 if db_query.data:
@@ -127,7 +136,6 @@ if choice == "🔍 Pengesan Scam":
                     st.caption("💡 Hasil semakan pantas ditemui dalam memori pangkalan data komuniti (RM0 Kos API).")
                 else:
                     try:
-                        # Menggunakan model versi 2.5 flash yang aktif dan hijau kuotanya
                         model = genai.GenerativeModel('gemini-2.5-flash')
                         system_instruction = (
                             "Anda adalah pakar keselamatan siber terlatih di Malaysia. Analisis mesej di bawah. "
@@ -141,7 +149,6 @@ if choice == "🔍 Pengesan Scam":
                         status = "SCAM BAHAYA" if "KATEGORI: SCAM BAHAYA" in output_text or "SCAM BAHAYA" in output_text else "SELAMAT"
                         ulasan = output_text.replace("KATEGORI: SCAM BAHAYA", "").replace("KATEGORI: SELAMAT", "").strip()
                         
-                        # Menyimpan data ancaman baharu ke dalam storan awan Supabase
                         supabase.table("scam_logs").insert({
                             "teks_laporan": user_input.strip(),
                             "klasifikasi_gemini": status,
@@ -151,11 +158,9 @@ if choice == "🔍 Pengesan Scam":
                         st.error(f"Sistem mengalami kelengahan teknikal rangkaian. Ralat: {e}")
                         status = "RALAT"
                 
-                # Paparan keputusan mengikut klasifikasi siber
                 if status == "SCAM BAHAYA":
                     st.markdown(f"<div class='scam-card'><h3>⚠️ AMARAN KRITIKAL: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
                     
-                    # Penjanaan imej fizikal automatik untuk perkongsian mudah orang tua
                     image_bytes = generate_warning_card(status, ulasan)
                     st.image(image_bytes, caption="Kad Amaran AntiLolos Visual")
                     st.download_button("⬇️ Download Kad Amaran Ini (Simpan Imej)", image_bytes, "Amaran_AntiLolos.png", "image/png")
@@ -177,13 +182,12 @@ if choice == "🔍 Pengesan Scam":
                     st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Amaran Ini ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
 
 # ==========================================
-# SEGMEN 2: 🎯 UJIAN KEKEBALAN (KUIZ PENUH)
+# SEGMEN 2: 🎯 UJIAN KEKEBALAN
 # ==========================================
 elif choice == "🎯 Ujian Kekebalan":
     st.title("🎯 Ujian Kekebalan Digital")
     st.write("Hadapi 10 senario rawak simulasi ancaman harian. Adakah benteng pertahanan digital anda kukuh?")
     
-    # Himpunan lengkap 10 Soalan dengan pilihan jawapan komprehensif bagi melatih ketahanan siber
     semua_soalan = [
         {"pengirim": "011-3482XXXX", "mesej": "Salam bro, aku Shah ni. Tersalah hantar kod TAC kat fon kau. Boleh forward balik tak? Urgent!", "pilihan": [{"teks": "Salin dan hantar kod TAC terus sebab nak tolong kawan.", "risiko": 10}, {"teks": "Tanya dia balik 'Kau Shah yang mana satu?'", "risiko": 5}, {"teks": "Maki pengirim sebab curiga ini scammer.", "risiko": 2}, {"teks": "Abaikan, sekat nombor, dan call nombor sebenar Shah.", "risiko": 0}]},
         {"pengirim": "SMS Bank", "mesej": "AMARAN! Akaun anda diakses peranti asing. Sekat segera di: http://maybank-security-lock.com", "pilihan": [{"teks": "Panik dan terus klik link untuk tukar password.", "risiko": 10}, {"teks": "Klik link tapi sekadar nak tengok rupa website.", "risiko": 5}, {"teks": "Balas SMS tersebut 'Ini tipu!'", "risiko": 2}, {"teks": "Abaikan SMS dan buka aplikasi rasmi bank secara berasingan.", "risiko": 0}]},
@@ -197,7 +201,6 @@ elif choice == "🎯 Ujian Kekebalan":
         {"pengirim": "Mesej Viral", "mesej": "Bantuan e-Dompet RM300 dibuka! Tebus kredit percuma di: http://bantuan-tunai-gov.xyz", "pilihan": [{"teks": "Klik dan log masuk guna ID perbankan internet.", "risiko": 10}, {"teks": "Share link tu kat kawan lain suruh diorang cuba dulu.", "risiko": 5}, {"teks": "Klik link untuk tengok siapa yang buat website tu.", "risiko": 2}, {"teks": "Abaikan dan rujuk portal rasmi Kementerian Kewangan.", "risiko": 0}]}
     ]
 
-    # Menguruskan pergerakan kuiz rawak menggunakan session_state
     if "soalan_shuffled" not in st.session_state:
         st.session_state.soalan_shuffled = random.sample(semua_soalan, len(semua_soalan))
         st.session_state.soalan_semasa = 0
@@ -207,16 +210,12 @@ elif choice == "🎯 Ujian Kekebalan":
     if not st.session_state.kuiz_tamat:
         idx = st.session_state.soalan_semasa
         senario = st.session_state.soalan_shuffled[idx]
-        
         st.progress((idx) / 10, text=f"Senario {idx + 1} daripada 10")
         st.write("---")
-        
         st.caption(f"💬 Mesej Masuk daripada: **{senario['pengirim']}**")
         with st.chat_message("user", avatar="👤"):
             st.write(senario['mesej'])
-            
         st.write("👇 **Apakah tindakan refleks digital anda?**")
-        
         for i, pil in enumerate(senario['pilihan']):
             if st.button(pil['teks'], key=f"btn_{idx}_{i}", use_container_width=True):
                 st.session_state.skor_risiko += pil['risiko']
@@ -229,9 +228,7 @@ elif choice == "🎯 Ujian Kekebalan":
     else:
         st.write("---")
         st.success("🏁 Tahniah! Anda telah selesai mengharungi Ujian Kekebalan Digital AntiLolos.")
-        
         total = st.session_state.skor_risiko
-        
         if total >= 70:
             status, ulasan = "🔴 TAHAP KELOLOSAN KRITIKAL", "Sangat bahaya! Anda mudah panik dan mudah ditipu oleh taktik psikologi siber. Wang simpanan anda berisiko tinggi lolos ke tangan pihak ketiga."
         elif total >= 30:
@@ -247,17 +244,69 @@ elif choice == "🎯 Ujian Kekebalan":
                 <p style='font-size: 16px; text-align: justify; color: #475569;'>{ulasan}</p>
             </div>
         """, unsafe_allow_html=True)
-        
         kuiz_share_text = f"*🚨 UJIAN KEKEBALAN DIGITAL #ANTILOLOS 🚨*\nKeputusan Skor Risiko Saya: *{total}%*\n*Klasifikasi Kesedaran:* {status}\n\nJangan tunggu sehingga simpanan bocor. Jom uji ketahanan mental siber anda sekarang di: https://antilolos.streamlit.app"
         encoded_kuiz_text = urllib.parse.quote(kuiz_share_text)
         whatsapp_kuiz_url = f"https://api.whatsapp.com/send?text={encoded_kuiz_text}"
-        
         st.write("---")
         st.markdown(f'<a href="{whatsapp_kuiz_url}" target="_blank"><button style="background-color: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold;">➔ Kongsi Keputusan Kuiz ke WhatsApp Keluarga</button></a>', unsafe_allow_html=True)
-        
         if st.button("Ulang Semula Ujian", use_container_width=True):
             del st.session_state.soalan_shuffled
             st.session_state.soalan_semasa = 0
             st.session_state.skor_risiko = 0
             st.session_state.kuiz_tamat = False
             st.rerun()
+
+# ==========================================
+# SEGMEN 3: 📊 TOP 10 ADUAN SCAMMER (REAL-TIME AGGREGATION)
+# ==========================================
+elif choice == "📊 Top 10 Aduan":
+    st.title("📊 Trend Taktik Scammer Terkini")
+    st.subheader("Carta Kehangatan Ancaman Siber Komuniti")
+    st.write("Senarai 10 mesej penipuan yang paling kerap disemak dan dilaporkan oleh pengguna di dalam pangkalan data komuniti AntiLolos.")
+    
+    with st.spinner("Mengekstrak data carta kehangatan aduan siber..."):
+        # Mengambil data dari storan awan Supabase
+        res = supabase.table("scam_logs").select("teks_laporan, klasifikasi_gemini, ulasan_ai").execute()
+        
+        if res.data:
+            # Mengira kekerapan secara ad-hoc menggunakan kamus Python (Bulletproof & Pantas)
+            scam_counts = {}
+            for data_row in res.data:
+                if data_row.get("klasifikasi_gemini") == "SCAM BAHAYA":
+                    teks_lapor = data_row.get("teks_laporan", "").strip()
+                    ulas_ai = data_row.get("ulasan_ai", "").strip().replace("**", "")
+                    
+                    # Kunci gabungan teks dan ulasan untuk kejituan data
+                    kunci_data = (teks_lapor, ulas_ai)
+                    scam_counts[kunci_data] = scam_counts.get(kunci_data, 0) + 1
+            
+            # Menyusun kedudukan carta aduan tertinggi (Top 10)
+            top_10_sorted = sorted(scam_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+            
+            if top_10_sorted:
+                st.write("---")
+                for rank, ((teks_aduan, ulasan_aduan), jumlah_kes) in enumerate(top_10_sorted, 1):
+                    # Mendapatkan logo visual secara pintar berasaskan teks aduan
+                    logo_visual = dapatkan_logo_scam(teks_aduan)
+                    
+                    # Memotong teks aduan panjang untuk paparan senarai yang kemas
+                    teks_paparan = teks_aduan[:75] + "..." if len(teks_aduan) > 75 else teks_aduan
+                    ulasan_paparan = ulasan_aduan[:90] + "..." if len(ulasan_aduan) > 90 else ulasan_aduan
+                    
+                    # Suntikan UI senarai berbentuk kad leaderboard
+                    st.markdown(f"""
+                        <div class='leaderboard-item'>
+                            <div class='rank-number'>#{rank}</div>
+                            <div class='brand-logo'>{logo_visual}</div>
+                            <div class='scam-details'>
+                                <strong style='color: #1e293b; font-size: 15px;'>Mesej Ditangkap:</strong> 
+                                <span style='color: #475569; font-style: italic; font-size: 14px;'>"{teks_paparan}"</span><br>
+                                <small style='color: #ef4444; font-weight: 600; font-size: 12px;'>🛡️ Ulasan AI: {ulasan_paparan}</small>
+                            </div>
+                            <div class='badge-count'>{jumlah_kes} Aduan</div>
+                        </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("Pangkalan data belum merekodkan sebarang sampel kes 'SCAM BAHAYA' buat masa ini.")
+        else:
+            st.info("Tiada log rekod carian ditemui dalam pangkalan data komuniti.")
