@@ -21,7 +21,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 st.set_page_config(page_title="AntiLolos", page_icon="🛡️", layout="centered")
 
 # ==========================================
-# 2. SUNTIKAN GAYA REKAAN KHAS (ANTI-DARK MODE PERANTI)
+# 2. SUNTIKAN GAYA REKAAN KHAS (KAMPUNG-PROOF & ANTI-DARK MODE)
 # ==========================================
 st.markdown("""
     <style>
@@ -62,11 +62,51 @@ st.markdown("""
         color: #1e293b !important;
     }
     
-    /* Kemasan butang sentuhan jari mobile */
-    .stButton>button { border-radius: 25px !important; font-weight: bold; transition: all 0.3s ease; padding: 12px 24px !important; width: 100% !important; }
-    .stButton>button[data-testid="baseButton-primary"] { background-color: #ef4444 !important; color: #ffffff !important; border: none !important; }
-    .stButton>button[data-testid="baseButton-secondary"] { background-color: #ffffff !important; color: #1e293b !important; border: 1px solid #cbd5e1 !important; }
-    .stButton>button:hover { transform: scale(1.01); }
+    /* Konfigurasi asas semua butang agar mesra skrin telefon */
+    .stButton>button, .stDownloadButton>button { 
+        border-radius: 25px !important; 
+        font-weight: bold !important; 
+        transition: all 0.3s ease; 
+        padding: 12px 24px !important; 
+        width: 100% !important;
+        display: block !important;
+        height: auto !important;
+    }
+    
+    /* [SANGAT PENTING] Gaya Rekaan Khusus Butang Muat Turun (Download Button) Premium */
+    .stDownloadButton>button {
+        background-color: #2563eb !important; 
+        color: #ffffff !important; 
+        border: none !important;
+        text-align: center !important;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #1d4ed8 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Menjadikan butang pilihan kuiz mesra tulisan panjang pada skrin telefon */
+    .stButton>button[data-testid="baseButton-secondary"] { 
+        background-color: #ffffff !important; 
+        color: #334155 !important; 
+        border: 1px solid #cbd5e1 !important; 
+        white-space: normal !important;      
+        text-align: left !important;         
+        word-break: break-word !important;   
+        font-weight: 500 !important;
+    }
+    .stButton>button[data-testid="baseButton-secondary"]:hover {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+    }
+    
+    /* Warna khusus untuk Butang Utama (Semak Mesej) */
+    .stButton>button[data-testid="baseButton-primary"] { 
+        background-color: #ef4444 !important; 
+        color: #ffffff !important; 
+        border: none !important;
+        text-align: center !important;       
+    }
     
     /* Sentuhan visual responsif untuk kad amaran dan selamat */
     .scam-card { padding: 20px; border-radius: 15px; background-color: #fff5f5 !important; border-left: 6px solid #ef4444; box-shadow: 0px 4px 12px rgba(239, 68, 68, 0.06); margin-bottom: 20px; }
@@ -221,14 +261,14 @@ with tab1:
                     st.markdown(f"<div class='scam-card'><h3>⚠️ AMARAN KRITIKAL: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
                     image_bytes = generate_warning_card(status, ulasan)
                     st.image(image_bytes, use_container_width=True)
-                    st.download_button("⬇️ Download Kad Amaran Ini", image_bytes, "Amaran_AntiLolos.png", "image/png", use_container_width=True)
+                    st.download_button("⬇️ Download Kad Amaran Ini (Simpan Imej)", image_bytes, "Amaran_AntiLolos.png", "image/png", use_container_width=True)
                     share_text = f"*🚨 PERISAI AMARAN ANTILOLOS 🚨*\nMesej disemak: _\"{user_input[:40]}...\"_\n*Keputusan AI:* ⚠️ {ulasan}\nSemak segera di: https://antilolos.streamlit.app"
                 
                 elif status == "SELAMAT":
                     st.markdown(f"<div class='safe-card'><h3>✅ STATUS KESELAMATAN: {status}</h3><p>{ulasan}</p></div>", unsafe_allow_html=True)
                     image_bytes = generate_warning_card(status, ulasan)
                     st.image(image_bytes, use_container_width=True)
-                    st.download_button("⬇️ Download Kad Pengesahan", image_bytes, "Selamat_AntiLolos.png", "image/png", use_container_width=True)
+                    st.download_button("⬇️ Download Kad Pengesahan Ini", image_bytes, "Selamat_AntiLolos.png", "image/png", use_container_width=True)
                     share_text = f"*ℹ️ INFO KESELAMATAN ANTILOLOS*\nMesej ini telah disemak dan disahkan *SELAMAT*.\nSemak di: https://antilolos.streamlit.app"
                 
                 if status != "RALAT":
