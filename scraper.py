@@ -72,7 +72,7 @@ def jalankan_ejen_scraper_multi_agensi():
     # Mengerahkan Gemini untuk memproses dan menstrukturkan teks amaran siber
     try:
         print("🧠 Menghantar ke Gemini 2.5 Flash untuk membina ulasan mesra warga emas...")
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3-flash-live')
         prompt_scraper = (
             f"Berikut adalah senarai nama taktik/syarikat penipuan siber terkini di Malaysia: {entiti_mentah_terkumpul}. "
             "Bagi setiap item, jana satu ulasan amaran siber yang ringkas, kasual, menyentuh hati, dan mudah difahami warga emas (makcik/pakcik). "
